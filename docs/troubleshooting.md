@@ -37,8 +37,8 @@ sudo tail -n 50 /var/log/mosquitto/mosquitto.log
 ## 3. Are the Python services running?
 
 ```bash
-systemctl status mqtt-bridge data-logger telegram-bot
-journalctl -u mqtt-bridge -n 100 --no-pager
+systemctl status data-logger telegram-bot
+journalctl -u data-logger -n 100 --no-pager
 ```
 
 | Symptom | Cause | Fix |
@@ -66,9 +66,9 @@ mysql -u livinglab -p livinglab -e "SELECT * FROM readings ORDER BY id DESC LIMI
 | Symptom | Cause | Fix |
 |---|---|---|
 | `COUNT(*)` stays 0 | Logger not subscribed, or insert failing silently | Check logger logs for SQL errors |
-| `Cannot add or update a child row` (FK) | Device not registered in `devices` | `INSERT INTO devices (device_id, board_type, role) VALUES (...)` |
-| `Data too long` / `Incorrect decimal value` | Payload field out of range or wrong type | Validate in the bridge; check `DECIMAL(5,2)` bounds |
-| Inserts slow after months | Missing index / table huge | Confirm `idx_readings_device_time`; apply retention |
+| `Cannot add or update a child row` (FK) | This schema has no foreign keys — the error means you edited `db/schema.sql` locally | Use the schema in the repo unchanged |
+| `Data too long` / `Incorrect decimal value` | Payload field out of range or wrong type | Check the DECIMAL bounds in `docs/database.md` |
+| Inserts slow after months | Table large, no index on `datetime` | Confirm `idx_sensor_datetime`; apply retention |
 | `Access denied for user` | Wrong DB credentials or host grant | `GRANT ... TO 'livinglab'@'localhost'` |
 
 ## 5. Is the bot responding?
@@ -103,14 +103,14 @@ vcgencmd measure_temp   # Pi temperature
 |---|---|---|
 | Random Pi reboots | Undervoltage | Official PSU; check `dmesg` for `voltage` |
 | MariaDB "disk full" | Logs/readings unbounded | Retention job + log rotation |
-| Everything fails after reboot | Services not enabled | `systemctl enable mosquitto mariadb mqtt-bridge data-logger telegram-bot` |
+| Everything fails after reboot | Services not enabled | `systemctl enable mosquitto mariadb data-logger telegram-bot` |
 
 ## 8. Nuclear reset (lab machine only)
 
 ```bash
-sudo systemctl stop mqtt-bridge data-logger telegram-bot
+sudo systemctl stop data-logger telegram-bot
 sudo systemctl restart mosquitto mariadb
-sudo systemctl start mqtt-bridge data-logger telegram-bot
+sudo systemctl start data-logger telegram-bot
 ```
 
 Only after the three basics pass: broker `is-active`, `mosquitto_sub` shows traffic, `SELECT COUNT(*)` increases.
@@ -121,8 +121,8 @@ Collect these before asking for help:
 
 ```bash
 uname -a
-systemctl status mosquitto mariadb mqtt-bridge data-logger telegram-bot --no-pager
-journalctl -u mqtt-bridge -u data-logger -u telegram-bot -n 100 --no-pager
+systemctl status mosquitto mariadb data-logger telegram-bot --no-pager
+journalctl -u data-logger -u data-logger -u telegram-bot -n 100 --no-pager
 mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"
 mosquitto_sub -t 'smartgreengarden/#' -v -W 5
 ```

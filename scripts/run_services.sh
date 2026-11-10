@@ -31,13 +31,15 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-for svc in mqtt-bridge data-logger telegram-bot; do
+for svc in data-logger telegram-bot; do
   if [[ -f "services/$svc/main.py" ]]; then
     entry="main.py"
   elif [[ -f "services/$svc/telegrambot.py" ]]; then
     entry="telegrambot.py"
+  elif [[ -f "services/$svc/dataSave.py" ]]; then
+    entry="dataSave.py"
   else
-    echo "skip $svc (no main.py)" >&2
+    echo "skip $svc (no entry point)" >&2
     continue
   fi
   echo "starting $svc ($entry)"

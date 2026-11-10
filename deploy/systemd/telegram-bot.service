@@ -1,6 +1,6 @@
 [Unit]
 Description=Living Lab Telegram bot
-After=network-online.target mariadb.service mosquitto.service mqtt-bridge.service
+After=network-online.target mariadb.service mosquitto.service
 Wants=network-online.target
 
 [Service]

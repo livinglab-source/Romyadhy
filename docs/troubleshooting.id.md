@@ -37,8 +37,8 @@ sudo tail -n 50 /var/log/mosquitto/mosquitto.log
 ## 3. Apakah layanan Python jalan?
 
 ```bash
-systemctl status mqtt-bridge data-logger telegram-bot
-journalctl -u mqtt-bridge -n 100 --no-pager
+systemctl status data-logger telegram-bot
+journalctl -u data-logger -n 100 --no-pager
 ```
 
 | Gejala | Penyebab | Solusi |
@@ -66,9 +66,9 @@ mysql -u livinglab -p livinglab -e "SELECT * FROM readings ORDER BY id DESC LIMI
 | Gejala | Penyebab | Solusi |
 |---|---|---|
 | `COUNT(*)` tetap 0 | Logger tidak subscribe, atau insert gagal diam-diam | Cek log logger untuk error SQL |
-| `Cannot add or update a child row` (FK) | Device belum terdaftar di `devices` | `INSERT INTO devices (device_id, board_type, role) VALUES (...)` |
-| `Data too long` / `Incorrect decimal value` | Field payload di luar jangkauan atau tipe salah | Validasi di bridge; cek batas `DECIMAL(5,2)` |
-| Insert melambat setelah berbulan-bulan | Index hilang / tabel membesar | Pastikan `idx_readings_device_time`; terapkan retensi |
+| `Cannot add or update a child row` (FK) | Skema ini tidak punya foreign key — error berarti Anda mengubah `db/schema.sql` secara lokal | Pakai skema di repo tanpa perubahan |
+| `Data too long` / `Incorrect decimal value` | Field payload di luar jangkauan atau tipe salah | Cek batas DECIMAL di `docs/database.id.md` |
+| Insert melambat setelah berbulan-bulan | Tabel besar, tidak ada index pada `datetime` | Pastikan `idx_sensor_datetime`; terapkan retensi |
 | `Access denied for user` | Kredensial DB salah atau grant host salah | `GRANT ... TO 'livinglab'@'localhost'` |
 
 ## 5. Apakah bot merespons?
@@ -103,14 +103,14 @@ vcgencmd measure_temp   # suhu Pi
 |---|---|---|
 | Pi reboot acak | Undervoltage | Pakai PSU resmi; cek `dmesg` untuk `voltage` |
 | MariaDB "disk full" | Log/readings tanpa batas | Job retensi + rotasi log |
-| Semua mati setelah reboot | Layanan tidak di-enable | `systemctl enable mosquitto mariadb mqtt-bridge data-logger telegram-bot` |
+| Semua mati setelah reboot | Layanan tidak di-enable | `systemctl enable mosquitto mariadb data-logger telegram-bot` |
 
 ## 8. Reset menyeluruh (hanya mesin lab)
 
 ```bash
-sudo systemctl stop mqtt-bridge data-logger telegram-bot
+sudo systemctl stop data-logger telegram-bot
 sudo systemctl restart mosquitto mariadb
-sudo systemctl start mqtt-bridge data-logger telegram-bot
+sudo systemctl start data-logger telegram-bot
 ```
 
 Baru lakukan setelah tiga syarat dasar lolos: broker `is-active`, `mosquitto_sub` menunjukkan trafik, `SELECT COUNT(*)` bertambah.
@@ -121,8 +121,8 @@ Kumpulkan ini sebelum bertanya:
 
 ```bash
 uname -a
-systemctl status mosquitto mariadb mqtt-bridge data-logger telegram-bot --no-pager
-journalctl -u mqtt-bridge -u data-logger -u telegram-bot -n 100 --no-pager
+systemctl status mosquitto mariadb data-logger telegram-bot --no-pager
+journalctl -u data-logger -u data-logger -u telegram-bot -n 100 --no-pager
 mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"
 mosquitto_sub -t 'smartgreengarden/#' -v -W 5
 ```

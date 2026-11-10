@@ -80,7 +80,7 @@ Satu venv bersama paling sederhana untuk tiga layanan kecil:
 cd /opt/livinglab/Romyadhy
 sudo -u livinglab python3 -m venv .venv
 sudo -u livinglab .venv/bin/pip install --upgrade pip
-sudo -u livinglab .venv/bin/pip install -r services/mqtt-bridge/requirements.txt
+sudo -u livinglab .venv/bin/pip install -r services/data-logger/requirements.txt
 sudo -u livinglab .venv/bin/pip install -r services/data-logger/requirements.txt
 sudo -u livinglab .venv/bin/pip install -r services/telegram-bot/requirements.txt
 ```
@@ -120,12 +120,12 @@ StandardError=journal
 WantedBy=multi-user.target
 ```
 
-Ulangi untuk `mqtt-bridge` dan `telegram-bot` (ubah `Description`, `WorkingDirectory`, `ExecStart`, dan `After` bila perlu — bot sebaiknya start setelah `mqtt-bridge`).
+Ulangi untuk `telegram-bot` (ubah `Description`, `WorkingDirectory`, `ExecStart`, dan `After` bila perlu). Unit-nya sudah tersedia di `deploy/systemd/`.
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now mqtt-bridge data-logger telegram-bot
-sudo systemctl status mqtt-bridge data-logger telegram-bot
+sudo systemctl enable --now data-logger telegram-bot
+sudo systemctl status data-logger telegram-bot
 ```
 
 Template tersedia di [`deploy/systemd/`](../deploy/systemd/).
@@ -134,7 +134,7 @@ Template tersedia di [`deploy/systemd/`](../deploy/systemd/).
 
 ```bash
 journalctl -u data-logger -f
-journalctl -u mqtt-bridge -f --since "10 min ago"
+journalctl -u data-logger -f --since "10 min ago"
 journalctl -u telegram-bot -n 100 --no-pager
 ```
 
@@ -159,7 +159,7 @@ systemctl is-active mosquitto
 mysql -u livinglab -p -e "SELECT COUNT(*) FROM livinglab.readings;"
 
 # 3. Layanan hidup
-systemctl is-active mqtt-bridge data-logger telegram-bot
+systemctl is-active data-logger telegram-bot
 
 # 4. Ada node yang publish
 mosquitto_sub -t 'smartgreengarden/#' -v
@@ -173,7 +173,7 @@ Jika keempatnya lolos, pipeline hidup dari ujung ke ujung.
 cd /opt/livinglab/Romyadhy
 sudo -u livinglab git pull
 sudo -u livinglab .venv/bin/pip install -r services/*/requirements.txt
-sudo systemctl restart mqtt-bridge data-logger telegram-bot
+sudo systemctl restart data-logger telegram-bot
 ```
 
 Periksa `db/migrations/` untuk file baru dan terapkan berurutan sebelum restart.

@@ -1,7 +1,7 @@
 # Local development stack: Mosquitto + MariaDB
 # Usage: cd deploy && docker compose up -d
 #
-# Services (mqtt-bridge, data-logger, telegram-bot) are NOT included here —
+# Services (data-logger, telegram-bot) are NOT included here —
 # run them with scripts/run_services.sh so you can see the logs live.
 
 services:

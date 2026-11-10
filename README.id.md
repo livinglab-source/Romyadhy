@@ -13,6 +13,9 @@
 ```mermaid
 flowchart LR
   A["ESP32<br/>sensor + relay"] -->|"sensor/data<br/>notification"| B["Broker Mosquitto<br/>(Raspberry Pi)"]
+  B --> L["data-logger<br/>dataSave.py"]
+  L --> DB[("MariaDB")]
+  L -.->|opsional| FB[("Firebase RTDB")]
   B --> C["telegram-bot"]
   C -->|"sendMessage"| D["Telegram"]
   D -->|"/perintah"| C
@@ -31,9 +34,8 @@ Penjelasan lengkap: [docs/architecture.id.md](docs/architecture.id.md)
 |---|---|---|---|---|
 | Node hidroponik ESP32 | `firmware/esp32-sensor-node` | C++ (PlatformIO) | ⬜ source menyusul | [README](firmware/esp32-sensor-node/README.md) |
 | Gateway Wemos | `firmware/wemos-gateway` | C++ (PlatformIO) | ⬜ source menyusul | [README](firmware/wemos-gateway/README.md) |
+| Data logger | `services/data-logger` | Python 3.11 | ✅ sudah ada | [README](services/data-logger/README.md) |
 | Telegram bot | `services/telegram-bot` | Python 3.11 | ✅ sudah ada | [README](services/telegram-bot/README.md) |
-| MQTT bridge | `services/mqtt-bridge` | Python 3.11 | ⬜ direncanakan | [README](services/mqtt-bridge/README.md) |
-| Data logger | `services/data-logger` | Python 3.11 | ⬜ direncanakan | [README](services/data-logger/README.md) |
 
 > Nama folder menunjukkan **peran**, bukan tipe board. Pemetaan board → peran: [docs/hardware.md](docs/hardware.md)
 
@@ -87,9 +89,9 @@ Panduan lengkap Raspberry Pi (systemd, autostart, backup): [docs/deployment.id.m
 ## Status proyek
 
 - [x] Struktur repositori dan dokumentasi
+- [x] Implementasi data logger (`services/data-logger/dataSave.py`)
 - [x] Implementasi Telegram bot (`services/telegram-bot/telegrambot.py`)
 - [ ] Source firmware dimasukkan
-- [ ] MQTT bridge dan data logger diimplementasikan
 - [ ] Demo end-to-end terverifikasi
 
 ---

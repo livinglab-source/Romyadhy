@@ -9,7 +9,10 @@ Type=simple
 User=livinglab
 WorkingDirectory=/opt/livinglab/Romyadhy/services/data-logger
 EnvironmentFile=/opt/livinglab/Romyadhy/.env
-ExecStart=/opt/livinglab/Romyadhy/.venv/bin/python main.py
+ExecStart=/opt/livinglab/Romyadhy/.venv/bin/python dataSave.py
+# Local logs live next to the service (LOG_DIR defaults here).
+StateDirectory=livinglab-data-logger
+StateDirectoryMode=0750
 Restart=always
 RestartSec=5
 StandardOutput=journal

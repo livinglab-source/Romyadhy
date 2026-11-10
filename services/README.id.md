@@ -2,12 +2,11 @@
 
 [English](README.md) | [Bahasa Indonesia](README.id.md)
 
-Tiga layanan Python berjalan di Raspberry Pi, ditambah helper bersama.
+Dua layanan Python berjalan di Raspberry Pi. Tidak ada MQTT bridge terpisah: data logger subscribe langsung ke broker.
 
 | Layanan | Fungsi | Entry point | Dijalankan sebagai |
 |---|---|---|---|
-| [`mqtt-bridge/`](mqtt-bridge/) | Subscribe semua topik, validasi dan normalisasi payload | `main.py` | `mqtt-bridge.service` |
-| [`data-logger/`](data-logger/) | Menulis reading ke MariaDB | `main.py` | `data-logger.service` |
+| [`data-logger/`](data-logger/) | Subscribe data sensor, menulis ke MariaDB + Firebase RTDB opsional | `dataSave.py` | `data-logger.service` |
 | [`telegram-bot/`](telegram-bot/) | Alert, perintah, kontrol relay, kalibrasi, export CSV | `telegrambot.py` | `telegram-bot.service` |
 | [`common/`](common/) | Config loader, koneksi DB, wrapper MQTT | — | *(library, bukan service)* |
 
@@ -15,31 +14,35 @@ Tiga layanan Python berjalan di Raspberry Pi, ditambah helper bersama.
 
 | Layanan | Kode tersedia |
 |---|---|
+| `data-logger` | ✅ sudah ada (`dataSave.py`) |
 | `telegram-bot` | ✅ sudah ada (`telegrambot.py`) |
-| `mqtt-bridge` | ⬜ direncanakan — README menjelaskan perilaku yang dituju |
-| `data-logger` | ⬜ direncanakan — README menjelaskan perilaku yang dituju |
 
 ## Hubungan antar layanan
 
 ```mermaid
 flowchart LR
-  MQ[("Mosquitto")] --> BR["mqtt-bridge"]
-  BR --> LOG["data-logger"]
+  ESP["ESP32<br/>sensor + relay"] -->|"sensor/data<br/>notification"| MQ[("Mosquitto")]
+  MQ --> LOG["data-logger"]
   LOG --> DB[("MariaDB")]
+  LOG -.->|opsional| FB[("Firebase RTDB")]
   MQ --> BOT["telegram-bot"]
   BOT --> DB
-  BOT --> MQ
+  BOT -->|"relay/*/command<br/>system/mode"| MQ
+  MQ --> ESP
 ```
+
+Kedua layanan subscribe secara independen. Tidak ada yang bergantung pada yang lain: bot tetap menjawab perintah saat logger menulis baris.
 
 ## Konvensi
 
 | Item | Aturan |
 |---|---|
-| Entry point | `main.py` di tiap folder layanan (bot memakai `telegrambot.py`) |
+| Entry point | `dataSave.py` dan `telegrambot.py` |
 | Dependensi | `requirements.txt` per layanan |
-| Konfigurasi | Dibaca dari environment; dev lokal memuat `.env` |
-| Logging | Modul `logging` ke stdout (ditangkap journald di systemd) |
-| Tanpa rahasia | Jangan hardcode token atau password — bot berhenti jika ada yang hilang |
+| Konfigurasi | Dibaca dari environment; dev lokal memuat `.env` dari root repo |
+| Logging | Modul `logging`; journald menangkap stdout di systemd |
+| Tanpa rahasia | Jangan hardcode token atau password — layanan berhenti jika nilai wajib hilang |
+| State lokal | Log dan export CSV default ke `./logs` dan `./exports` di folder tiap layanan (diabaikan git) |
 
 ## Jalankan lokal
 
@@ -47,12 +50,15 @@ flowchart LR
 scripts/run_services.sh
 ```
 
+Skrip menjalankan layanan yang ada dan melewati sisanya.
+
 ## Deploy
 
 Lihat [../docs/deployment.id.md](../docs/deployment.id.md) dan template unit di [`../deploy/systemd/`](../deploy/systemd/).
 
 ## Menambah layanan
 
-1. Buat `services/<nama>/` berisi `main.py`, `requirements.txt`, `README.md`.
+1. Buat `services/<nama>/` berisi entry point, `requirements.txt`, `README.md`.
 2. Pakai ulang `services/common/` untuk config dan koneksi.
-3. Tambahkan unit di `deploy/systemd/` dan dokumentasikan di README root.
+3. Tambahkan unit di `deploy/systemd/` dan daftarkan di sini serta di README root.
+4. Tambahkan nama file entry point ke loop di `scripts/run_services.sh`.

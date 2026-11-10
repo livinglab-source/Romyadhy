@@ -80,7 +80,7 @@ One shared venv is simplest for three small services:
 cd /opt/livinglab/Romyadhy
 sudo -u livinglab python3 -m venv .venv
 sudo -u livinglab .venv/bin/pip install --upgrade pip
-sudo -u livinglab .venv/bin/pip install -r services/mqtt-bridge/requirements.txt
+sudo -u livinglab .venv/bin/pip install -r services/data-logger/requirements.txt
 sudo -u livinglab .venv/bin/pip install -r services/data-logger/requirements.txt
 sudo -u livinglab .venv/bin/pip install -r services/telegram-bot/requirements.txt
 ```
@@ -120,12 +120,12 @@ StandardError=journal
 WantedBy=multi-user.target
 ```
 
-Repeat for `mqtt-bridge` and `telegram-bot` (change `Description`, `WorkingDirectory`, `ExecStart`, and `After` as needed — the bot should start after `mqtt-bridge`).
+Repeat for `telegram-bot` (change `Description`, `WorkingDirectory`, `ExecStart`, and `After` as needed). The unit is already provided in `deploy/systemd/`.
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now mqtt-bridge data-logger telegram-bot
-sudo systemctl status mqtt-bridge data-logger telegram-bot
+sudo systemctl enable --now data-logger telegram-bot
+sudo systemctl status data-logger telegram-bot
 ```
 
 Templates live in [`deploy/systemd/`](../deploy/systemd/).
@@ -134,7 +134,7 @@ Templates live in [`deploy/systemd/`](../deploy/systemd/).
 
 ```bash
 journalctl -u data-logger -f
-journalctl -u mqtt-bridge -f --since "10 min ago"
+journalctl -u data-logger -f --since "10 min ago"
 journalctl -u telegram-bot -n 100 --no-pager
 ```
 
@@ -159,7 +159,7 @@ systemctl is-active mosquitto
 mysql -u livinglab -p -e "SELECT COUNT(*) FROM livinglab.readings;"
 
 # 3. Services up
-systemctl is-active mqtt-bridge data-logger telegram-bot
+systemctl is-active data-logger telegram-bot
 
 # 4. A node publishes
 mosquitto_sub -t 'smartgreengarden/#' -v
@@ -173,7 +173,7 @@ If all four pass, the pipeline is alive end to end.
 cd /opt/livinglab/Romyadhy
 sudo -u livinglab git pull
 sudo -u livinglab .venv/bin/pip install -r services/*/requirements.txt
-sudo systemctl restart mqtt-bridge data-logger telegram-bot
+sudo systemctl restart data-logger telegram-bot
 ```
 
 Check `db/migrations/` for new files and apply them in order before restarting.

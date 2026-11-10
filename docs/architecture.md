@@ -6,81 +6,111 @@
 
 The Living Lab is an IoT pipeline with three layers:
 
-1. **Edge** — ESP32 and Wemos boards read sensors and publish MQTT messages.
+1. **Edge** — the ESP32 reads sensors, drives relays, and publishes MQTT messages.
 2. **Transport** — a Mosquitto broker on the Raspberry Pi receives every message.
-3. **Backend** — Python services on the Pi normalize messages, persist them to MariaDB, and notify users over Telegram.
+3. **Backend** — two Python services on the Pi: one persists readings, one talks to users.
 
 ```mermaid
 flowchart TB
   subgraph Edge["Edge (sensors)"]
-    ESP["ESP32 sensor node"]
-    WEM["Wemos D1 mini"]
+    ESP["ESP32<br/>sensors + relays"]
   end
 
   subgraph Pi["Raspberry Pi"]
     MQ[("Mosquitto<br/>:1883")]
-    BR["mqtt-bridge"]
-    LOG["data-logger"]
-    BOT["telegram-bot"]
+    LOG["data-logger<br/>dataSave.py"]
+    BOT["telegram-bot<br/>telegrambot.py"]
     DB[("MariaDB<br/>:3306")]
+    FB[("Firebase RTDB<br/>optional")]
   end
 
   TG["Telegram API"]
 
-  ESP -->|"smartgreengarden/sensor/data"| MQ
-  WEM -->|"smartgreengarden/sensor/data"| MQ
-  MQ --> BR
-  BR -->|"validated, normalized"| LOG
+  ESP -->|"sensor/data"| MQ
+  ESP -->|"notification"| MQ
+  MQ --> LOG
   LOG -->|"INSERT"| DB
-  MQ -->|"status"| BOT
+  LOG -.->|"mirror"| FB
+  MQ --> BOT
+  BOT -->|"SELECT"| DB
   BOT -->|"sendMessage"| TG
   TG -->|"/commands"| BOT
-  BOT -->|"query"| DB
-  BOT -->|"publish cmd"| MQ
-  MQ -->|"smartgreengarden/relay/&lt;name&gt;/command"| ESP
+  BOT -->|"relay/*/command<br/>system/mode"| MQ
+  MQ -->|"relay commands"| ESP
 ```
 
 ## Responsibilities
 
 | Component | Owns | Does **not** do |
 |---|---|---|
-| Firmware (ESP32 / Wemos) | Reading sensors, publishing `data` and `status`, obeying `cmd` | Direct DB access, Telegram calls |
-| `mqtt-bridge` | Subscribe to all topics, validate payload, normalize units, forward to downstream | Writing to the database |
-| `data-logger` | Persist readings to MariaDB, enforce schema types | React to commands |
-| `telegram-bot` | User commands, alerts, DB queries, publishing commands to devices | Parsing raw sensor payloads |
+| ESP32 firmware | Reading sensors, driving relays, publishing `sensor/data` and `notification`, obeying relay/mode/calibration topics | Direct DB access, Telegram calls |
+| `data-logger` | Subscribe to `sensor/data`, flatten JSON, write MariaDB, optional Firebase mirror, watchdog warnings | Validate command input, talk to users |
+| `telegram-bot` | Command interface, alerts, relay control, calibration sequencing, CSV export, relay event log | Write sensor readings to the DB |
+| Mosquitto | Message routing, retained state for relay/mode topics | Business logic |
+| MariaDB | Durable history and relay event log | Real-time delivery |
 
-Keeping these separated means you can restart or rewrite one service without touching the others.
+There is deliberately **no separate MQTT bridge**: the logger subscribes to the broker directly. An intermediate validator was considered and dropped — the payload is small and the logger already logs malformed input with the raw text.
 
-## Message flow (a single reading)
+## Message flow
+
+### A sensor reading
 
 ```mermaid
 sequenceDiagram
   participant E as ESP32
   participant M as Mosquitto
-  participant B as mqtt-bridge
   participant L as data-logger
   participant D as MariaDB
+  participant F as Firebase
 
-  E->>M: PUBLISH smartgreengarden/esp32-01/data
-  M-->>B: deliver
-  B->>B: validate JSON + normalize
-  B->>L: forward reading
-  L->>D: INSERT INTO readings
+  E->>M: PUBLISH sensor/data
+  M-->>L: deliver
+  L->>L: parse JSON, derive level categories
+  L->>F: write record (if configured)
+  L->>D: INSERT INTO hydroponic_water_data_romy
   D-->>L: ok
 ```
+
+Both services receive the same message independently. The bot updates its in-memory dashboard; the logger persists the row. Neither waits for the other.
+
+### A relay command
+
+```mermaid
+sequenceDiagram
+  participant U as User
+  participant B as telegram-bot
+  participant M as Mosquitto
+  participant E as ESP32
+  participant D as MariaDB
+
+  U->>B: /relay irigasi on
+  B->>B: check session + mode == manual
+  B->>M: PUBLISH relay/pompa_irigasi/command = 1
+  M-->>E: deliver
+  E->>M: PUBLISH same topic = 1 (state echo)
+  M-->>B: echo updates panel + log_relay_event
+  B->>D: INSERT INTO relay_logs
+```
+
+The echo is what keeps the panel honest: the bot shows the state the hardware reports, not the state it asked for.
 
 ## Design decisions
 
 | Decision | Reason |
 |---|---|
-| MQTT over HTTP | Low bandwidth, QoS, retain for last-known status, works well on ESP32 |
-| Broker on the Pi, not in the cloud | Lab network is local; no internet dependency for logging |
-| Separate bridge and logger | Validation logic changes often; the DB writer should stay stable |
-| MariaDB | Relational queries for reports; already available on campus setups |
+| MQTT over HTTP | Low bandwidth, works on ESP32, retained messages give last-known state |
+| Broker on the Pi, not in the cloud | Lab network is local; logging keeps working without internet |
+| Logger subscribes directly (no bridge) | One less moving part; malformed payloads are logged with raw text |
+| Throttled writes (`SAVE_THROTTLE_SECONDS`) | Sensor may publish far faster than the DB needs rows |
+| Firebase mirror is optional and non-blocking | Cloud outage must not stop local logging; `uploaded_to_cloud` marks the gap |
+| Relay events in their own table | Duration/statistics queries are cheap and do not scan the big sensor table |
 | `.env` configuration | One codebase for dev and Pi; no secrets in git |
 
 ## Known limitations
 
-- TODO: document any single points of failure (e.g. one broker, no HA).
-- TODO: note whether messages are queued if the DB is down (QoS 1 + subscriber persistence).
-- TODO: note WiFi range / node placement constraints.
+- **In-memory state is not persisted.** Bot sparklines, alert queue, and relay ON timers reset on restart. Only `relay_logs` is durable.
+- **Single broker, single Pi.** No HA; a broker restart drops live data (retained topics survive).
+- **No offline buffering.** If the DB is down, readings for that window are lost — they are not queued.
+- **Firebase path collides within a minute.** `<date>/<HH-MM>` is overwritten if two records land in the same minute.
+- **Level thresholds differ** between the logger (25/50/75) and the bot display (30/75/100).
+- **Throttled data is not gap-filled.** A 60 s throttle with a 5 s publish rate discards the intermediate readings by design.

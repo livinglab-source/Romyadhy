@@ -37,5 +37,5 @@ Jika memakai Arduino IDE, pertahankan nama folder sama dengan nama sketch `.ino`
 
 1. Buat `firmware/<peran>/` berisi `src/main.cpp`, `platformio.ini`, `README.md`.
 2. Tambahkan ke tabel di atas dan ke `docs/hardware.id.md`.
-3. Daftarkan di DB: `INSERT INTO devices (device_id, board_type, role) VALUES (...);`
+3. Tidak perlu registrasi: logger menulis payload apa pun yang valid. Bila tabel belum ada, `dataSave.py` membuatnya saat start.
 4. Publish ke `smartgreengarden/<device-id>/data` dan set Last Will pada `status`.

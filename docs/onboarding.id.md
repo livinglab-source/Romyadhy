@@ -69,7 +69,7 @@ mysql -u root -p < db/schema.sql
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -r services/mqtt-bridge/requirements.txt
+pip install -r services/data-logger/requirements.txt
 pip install -r services/data-logger/requirements.txt
 pip install -r services/telegram-bot/requirements.txt
 
