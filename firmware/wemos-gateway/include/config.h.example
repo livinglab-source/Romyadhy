@@ -1,0 +1,21 @@
+# Copy to include/config.h and fill in real values.
+# include/config.h is git-ignored.
+
+#pragma once
+
+// --- WiFi (2.4 GHz only) ---
+#define WIFI_SSID     "your-lab-ssid"
+#define WIFI_PASSWORD "your-lab-password"
+
+// --- MQTT broker (Raspberry Pi LAN IP) ---
+#define MQTT_HOST "192.168.1.100"
+#define MQTT_PORT 1883
+#define MQTT_USER "livinglab"
+#define MQTT_PASS "change_me"
+
+// --- Device identity: must match the MQTT topic segment ---
+#define DEVICE_ID "wemos-01"
+
+// --- Pins ---
+// TODO: set the relay/output pin for your wiring
+#define RELAY_PIN 5
