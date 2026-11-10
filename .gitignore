@@ -1,0 +1,36 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+venv/
+.venv/
+env/
+.env
+
+# --- Arduino / PlatformIO ---
+.pio/
+.pioenvs/
+.piolibdeps/
+*.bin
+*.elf
+*.hex
+build/
+# Arduino IDE local sketch config
+sketch.json
+# Local firmware secrets (copy from config.h.example)
+include/config.h
+
+# --- Data, dumps, local logs ---
+*.db
+*.sqlite3
+*.sql.gz
+*.dump
+data/
+logs/
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
