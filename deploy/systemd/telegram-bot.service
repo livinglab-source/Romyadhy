@@ -1,0 +1,18 @@
+[Unit]
+Description=Living Lab Telegram bot
+After=network-online.target mariadb.service mosquitto.service mqtt-bridge.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=livinglab
+WorkingDirectory=/opt/livinglab/Romyadhy/services/telegram-bot
+EnvironmentFile=/opt/livinglab/Romyadhy/.env
+ExecStart=/opt/livinglab/Romyadhy/.venv/bin/python main.py
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
