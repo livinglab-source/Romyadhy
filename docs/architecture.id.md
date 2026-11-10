@@ -27,8 +27,8 @@ flowchart TB
 
   TG["Telegram API"]
 
-  ESP -->|"livinglab/&lt;device&gt;/data"| MQ
-  WEM -->|"livinglab/&lt;device&gt;/data"| MQ
+  ESP -->|"smartgreengarden/sensor/data"| MQ
+  WEM -->|"smartgreengarden/sensor/data"| MQ
   MQ --> BR
   BR -->|"validasi + normalisasi"| LOG
   LOG -->|"INSERT"| DB
@@ -37,7 +37,7 @@ flowchart TB
   TG -->|"/perintah"| BOT
   BOT -->|"query"| DB
   BOT -->|"publish cmd"| MQ
-  MQ -->|"livinglab/&lt;device&gt;/cmd"| ESP
+  MQ -->|"smartgreengarden/relay/&lt;name&gt;/command"| ESP
 ```
 
 ## Tanggung jawab
@@ -61,7 +61,7 @@ sequenceDiagram
   participant L as data-logger
   participant D as MariaDB
 
-  E->>M: PUBLISH livinglab/esp32-01/data
+  E->>M: PUBLISH smartgreengarden/esp32-01/data
   M-->>B: kirim
   B->>B: validasi JSON + normalisasi
   B->>L: teruskan reading

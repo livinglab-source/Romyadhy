@@ -2,7 +2,7 @@
 
 [English](README.md) | [Bahasa Indonesia](README.id.md)
 
-Subscribe `livinglab/#`, validasi dan normalisasi payload, lalu teruskan reading bersih ke data logger.
+Subscribe `smartgreengarden/#`, validasi dan normalisasi payload, lalu teruskan reading bersih ke data logger.
 
 - Bahasa: Python 3.11
 - Unit: `deploy/systemd/mqtt-bridge.service`
@@ -10,7 +10,7 @@ Subscribe `livinglab/#`, validasi dan normalisasi payload, lalu teruskan reading
 
 ## Tanggung jawab
 
-- Subscribe `livinglab/+/data` dan `livinglab/+/status`
+- Subscribe `smartgreengarden/+/data` dan `smartgreengarden/+/status`
 - Tolak payload cacat (field hilang, nilai di luar jangkauan, `schema` salah)
 - Normalisasi satuan dan tipe sebelum diteruskan
 - Log peringatan berisi payload mentah saat validasi gagal
@@ -38,7 +38,7 @@ python main.py
 ## Debug
 
 ```bash
-mosquitto_sub -t 'livinglab/#' -v          # ada pesan masuk?
+mosquitto_sub -t 'smartgreengarden/#' -v          # ada pesan masuk?
 journalctl -u mqtt-bridge -f               # di Pi
 ```
 

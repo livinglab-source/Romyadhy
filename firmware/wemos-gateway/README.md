@@ -10,9 +10,11 @@ TODO: one sentence describing what this board actually does (relay control? seco
 
 ## Responsibilities
 
-- TODO
-- Subscribe to `livinglab/wemos-01/cmd`
-- Publish `livinglab/wemos-01/status` (retained) + Last Will
+- TODO — role not confirmed yet
+- Subscribe to the relay command topics it owns: `smartgreengarden/relay/<name>/command`
+- Publish its state back to the same topic so the bot stays in sync
+
+> The Wemos role is still undecided. Do not invent new topics: reuse the contract in [../../docs/mqtt-topics.md](../../docs/mqtt-topics.md).
 
 ## Hardware
 
@@ -40,8 +42,10 @@ cp include/config.h.example include/config.h
 
 | Direction | Topic | Payload |
 |---|---|---|
-| subscribe | `livinglab/wemos-01/cmd` | `{"schema":1,"action":"set_relay","value":1}` |
-| publish (retained) | `livinglab/wemos-01/status` | `{"schema":1,"online":true,"fw":"1.0.0"}` |
+| subscribe | `smartgreengarden/relay/<name>/command` | `1` / `0` |
+| publish | `smartgreengarden/relay/<name>/command` | `1` / `0` (state echo) |
+
+> Topic names are fixed by the contract; the role of this board determines which `<name>` it handles. See [../../docs/mqtt-topics.md](../../docs/mqtt-topics.md).
 
 ## Build and flash
 

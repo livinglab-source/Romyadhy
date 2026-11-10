@@ -4,12 +4,20 @@
 
 Tiga layanan Python berjalan di Raspberry Pi, ditambah helper bersama.
 
-| Layanan | Fungsi | Dijalankan sebagai |
-|---|---|---|
-| [`mqtt-bridge/`](mqtt-bridge/) | Subscribe semua topik, validasi dan normalisasi payload | `mqtt-bridge.service` |
-| [`data-logger/`](data-logger/) | Menulis reading ke MariaDB | `data-logger.service` |
-| [`telegram-bot/`](telegram-bot/) | Alert + perintah pengguna | `telegram-bot.service` |
-| [`common/`](common/) | Config loader, koneksi DB, wrapper MQTT | *(library, bukan service)* |
+| Layanan | Fungsi | Entry point | Dijalankan sebagai |
+|---|---|---|---|
+| [`mqtt-bridge/`](mqtt-bridge/) | Subscribe semua topik, validasi dan normalisasi payload | `main.py` | `mqtt-bridge.service` |
+| [`data-logger/`](data-logger/) | Menulis reading ke MariaDB | `main.py` | `data-logger.service` |
+| [`telegram-bot/`](telegram-bot/) | Alert, perintah, kontrol relay, kalibrasi, export CSV | `telegrambot.py` | `telegram-bot.service` |
+| [`common/`](common/) | Config loader, koneksi DB, wrapper MQTT | — | *(library, bukan service)* |
+
+## Status
+
+| Layanan | Kode tersedia |
+|---|---|
+| `telegram-bot` | ✅ sudah ada (`telegrambot.py`) |
+| `mqtt-bridge` | ⬜ direncanakan — README menjelaskan perilaku yang dituju |
+| `data-logger` | ⬜ direncanakan — README menjelaskan perilaku yang dituju |
 
 ## Hubungan antar layanan
 
@@ -27,11 +35,11 @@ flowchart LR
 
 | Item | Aturan |
 |---|---|
-| Entry point | `main.py` di tiap folder layanan |
+| Entry point | `main.py` di tiap folder layanan (bot memakai `telegrambot.py`) |
 | Dependensi | `requirements.txt` per layanan |
 | Konfigurasi | Dibaca dari environment; dev lokal memuat `.env` |
 | Logging | Modul `logging` ke stdout (ditangkap journald di systemd) |
-| Tanpa rahasia | Jangan hardcode token atau password |
+| Tanpa rahasia | Jangan hardcode token atau password — bot berhenti jika ada yang hilang |
 
 ## Jalankan lokal
 

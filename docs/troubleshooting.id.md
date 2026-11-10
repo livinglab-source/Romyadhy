@@ -7,7 +7,7 @@ Periksa dari atas ke bawah: **device → broker → layanan → database → bot
 ## 1. Apakah device benar-benar mengirim data?
 
 ```bash
-mosquitto_sub -t 'livinglab/#' -v
+mosquitto_sub -t 'smartgreengarden/#' -v
 ```
 
 | Hasil | Arti | Langkah |
@@ -124,7 +124,7 @@ uname -a
 systemctl status mosquitto mariadb mqtt-bridge data-logger telegram-bot --no-pager
 journalctl -u mqtt-bridge -u data-logger -u telegram-bot -n 100 --no-pager
 mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"
-mosquitto_sub -t 'livinglab/#' -v -W 5
+mosquitto_sub -t 'smartgreengarden/#' -v -W 5
 ```
 
 TODO: tambahkan pesan error yang benar-benar Anda temui saat pengembangan — itu yang akan ditemui mahasiswa berikutnya.

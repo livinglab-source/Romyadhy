@@ -93,7 +93,7 @@ Run these in four terminals:
 
 ```bash
 # 1. Watch MQTT
-mosquitto_sub -t 'livinglab/#' -v
+mosquitto_sub -t 'smartgreengarden/#' -v
 
 # 2. Watch the logger
 journalctl -u data-logger -f          # or the run_services.sh output

@@ -1,6 +1,6 @@
 # Romyadhy Projects Documentation Living Lab
 
-**Platform IoT Living Lab:** node sensor ESP32 / Wemos → MQTT (Mosquitto) → layanan Raspberry Pi → MariaDB + Telegram.
+**Smart Green Garden:** node hidroponik ESP32 → MQTT (Mosquitto) → layanan Raspberry Pi → MariaDB + Telegram.
 
 [English](README.md) | [Bahasa Indonesia](README.id.md)
 
@@ -12,14 +12,13 @@
 
 ```mermaid
 flowchart LR
-  A["Node sensor ESP32"] -->|publish MQTT| B["Broker Mosquitto<br/>(Raspberry Pi)"]
-  C["Gateway Wemos"] -->|publish MQTT| B
-  B --> D["mqtt-bridge"]
-  D --> E["data-logger"]
-  E --> F[("MariaDB")]
-  D --> G["telegram-bot"]
-  G --> H["Telegram"]
-  B -.->|status / alert| G
+  A["ESP32<br/>sensor + relay"] -->|"sensor/data<br/>notification"| B["Broker Mosquitto<br/>(Raspberry Pi)"]
+  B --> C["telegram-bot"]
+  C -->|"sendMessage"| D["Telegram"]
+  D -->|"/perintah"| C
+  C --> E[("MariaDB")]
+  C -->|"relay/*/command<br/>system/mode"| B
+  B --> A
 ```
 
 Penjelasan lengkap: [docs/architecture.id.md](docs/architecture.id.md)
@@ -28,13 +27,13 @@ Penjelasan lengkap: [docs/architecture.id.md](docs/architecture.id.md)
 
 ## Komponen
 
-| Komponen | Folder | Bahasa | Dokumentasi |
-|---|---|---|---|
-| Node sensor ESP32 | `firmware/esp32-sensor-node` | C++ (PlatformIO) | [README](firmware/esp32-sensor-node/README.md) |
-| Gateway Wemos | `firmware/wemos-gateway` | C++ (PlatformIO) | [README](firmware/wemos-gateway/README.md) |
-| MQTT bridge | `services/mqtt-bridge` | Python 3.11 | [README](services/mqtt-bridge/README.md) |
-| Data logger | `services/data-logger` | Python 3.11 | [README](services/data-logger/README.md) |
-| Telegram bot | `services/telegram-bot` | Python 3.11 | [README](services/telegram-bot/README.md) |
+| Komponen | Folder | Bahasa | Status | Dokumentasi |
+|---|---|---|---|---|
+| Node hidroponik ESP32 | `firmware/esp32-sensor-node` | C++ (PlatformIO) | ⬜ source menyusul | [README](firmware/esp32-sensor-node/README.md) |
+| Gateway Wemos | `firmware/wemos-gateway` | C++ (PlatformIO) | ⬜ source menyusul | [README](firmware/wemos-gateway/README.md) |
+| Telegram bot | `services/telegram-bot` | Python 3.11 | ✅ sudah ada | [README](services/telegram-bot/README.md) |
+| MQTT bridge | `services/mqtt-bridge` | Python 3.11 | ⬜ direncanakan | [README](services/mqtt-bridge/README.md) |
+| Data logger | `services/data-logger` | Python 3.11 | ⬜ direncanakan | [README](services/data-logger/README.md) |
 
 > Nama folder menunjukkan **peran**, bukan tipe board. Pemetaan board → peran: [docs/hardware.md](docs/hardware.md)
 
@@ -44,16 +43,16 @@ Penjelasan lengkap: [docs/architecture.id.md](docs/architecture.id.md)
 
 ```bash
 git clone <repo-url> && cd Romyadhy
-cp .env.example .env          # lalu isi kredensial MQTT dan DB
+cp .env.example .env          # lalu isi kredensial MQTT, DB, Telegram, ACCESS_PASSWORD
 sudo apt install mosquitto mosquitto-clients mariadb-server
 mysql -u root -p < db/schema.sql
-scripts/run_services.sh       # menjalankan bridge, logger, bot
+scripts/run_services.sh       # menjalankan layanan yang sudah ada
 ```
 
 Cek data mengalir:
 
 ```bash
-mosquitto_sub -t 'livinglab/#' -v
+mosquitto_sub -t 'smartgreengarden/#' -v
 ```
 
 Panduan lengkap Raspberry Pi (systemd, autostart, backup): [docs/deployment.id.md](docs/deployment.id.md)
@@ -88,9 +87,16 @@ Panduan lengkap Raspberry Pi (systemd, autostart, backup): [docs/deployment.id.m
 ## Status proyek
 
 - [x] Struktur repositori dan dokumentasi
+- [x] Implementasi Telegram bot (`services/telegram-bot/telegrambot.py`)
 - [ ] Source firmware dimasukkan
-- [ ] Source layanan Python dimasukkan
+- [ ] MQTT bridge dan data logger diimplementasikan
 - [ ] Demo end-to-end terverifikasi
+
+---
+
+## Keamanan
+
+Rahasia hanya ada di `.env` (diabaikan git). Jika token atau password pernah ter-commit, ganti sebelum dipublikasikan: lihat [docs/telegram-bot.id.md](docs/telegram-bot.id.md#catatan-keamanan).
 
 ---
 

@@ -52,7 +52,7 @@ sudo systemctl restart mosquitto
 Test:
 
 ```bash
-mosquitto_sub -h localhost -u livinglab -P '<password>' -t 'livinglab/#' -v
+mosquitto_sub -h localhost -u livinglab -P '<password>' -t 'smartgreengarden/#' -v
 ```
 
 ## 4. MariaDB
@@ -162,7 +162,7 @@ mysql -u livinglab -p -e "SELECT COUNT(*) FROM livinglab.readings;"
 systemctl is-active mqtt-bridge data-logger telegram-bot
 
 # 4. A node publishes
-mosquitto_sub -t 'livinglab/#' -v
+mosquitto_sub -t 'smartgreengarden/#' -v
 ```
 
 If all four pass, the pipeline is alive end to end.

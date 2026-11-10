@@ -66,6 +66,21 @@ CREATE TABLE IF NOT EXISTS device_status (
 ) ENGINE=InnoDB;
 
 -- ---------------------------------------------------------------------------
+-- Relay event log: written by the Telegram bot, one row per ON/OFF transition
+-- ---------------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS relay_logs (
+  id               BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+  relay_name       VARCHAR(64) NOT NULL,          -- irigasi | kuras_tandon | ...
+  state            ENUM('ON','OFF') NOT NULL,
+  event_time       DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+  duration_seconds INT UNSIGNED NULL,             -- filled on the OFF row
+  mode             VARCHAR(16) NULL,              -- auto | manual at the time
+  PRIMARY KEY (id),
+  KEY idx_relay_logs_name_time (relay_name, event_time),
+  KEY idx_relay_logs_time (event_time)
+) ENGINE=InnoDB;
+
+-- ---------------------------------------------------------------------------
 -- Alerts: threshold breaches and notifications sent
 -- ---------------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS alerts (

@@ -93,7 +93,7 @@ Jalankan di empat terminal:
 
 ```bash
 # 1. Pantau MQTT
-mosquitto_sub -t 'livinglab/#' -v
+mosquitto_sub -t 'smartgreengarden/#' -v
 
 # 2. Pantau logger
 journalctl -u data-logger -f          # atau output run_services.sh

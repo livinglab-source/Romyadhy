@@ -11,9 +11,9 @@ Reads environment sensors and publishes readings to MQTT every `PUBLISH_INTERVAL
 ## Responsibilities
 
 - Read TODO: sensor list (e.g. DHT22 temperature/humidity, BME280)
-- Publish `livinglab/esp32-01/data` every N seconds
-- Publish `livinglab/esp32-01/status` (retained) + register a Last Will
-- Subscribe to `livinglab/esp32-01/cmd` and act on it
+- Publish `smartgreengarden/esp32-01/data` every N seconds
+- Publish `smartgreengarden/esp32-01/status` (retained) + register a Last Will
+- Subscribe to `smartgreengarden/esp32-01/cmd` and act on it
 
 ## Hardware
 
@@ -49,9 +49,9 @@ Contract: [../../docs/mqtt-topics.md](../../docs/mqtt-topics.md)
 
 | Direction | Topic | Payload |
 |---|---|---|
-| publish | `livinglab/esp32-01/data` | `{"schema":1,"device_id":"esp32-01","ts":...,"temp":27.45,"hum":61.2}` |
-| publish (retained) | `livinglab/esp32-01/status` | `{"schema":1,"online":true,"rssi":-67,"uptime_s":...,"fw":"1.0.0"}` |
-| subscribe | `livinglab/esp32-01/cmd` | `{"schema":1,"action":"set_interval","value":10000}` |
+| publish | `smartgreengarden/esp32-01/data` | `{"schema":1,"device_id":"esp32-01","ts":...,"temp":27.45,"hum":61.2}` |
+| publish (retained) | `smartgreengarden/esp32-01/status` | `{"schema":1,"online":true,"rssi":-67,"uptime_s":...,"fw":"1.0.0"}` |
+| subscribe | `smartgreengarden/esp32-01/cmd` | `{"schema":1,"action":"set_interval","value":10000}` |
 
 Last Will on `status`: `{"schema":1,"device_id":"esp32-01","online":false}`
 

@@ -2,7 +2,7 @@
 
 [English](README.md) | [Bahasa Indonesia](README.id.md)
 
-Subscribes to `livinglab/#`, validates and normalizes payloads, forwards clean readings to the data logger.
+Subscribes to `smartgreengarden/#`, validates and normalizes payloads, forwards clean readings to the data logger.
 
 - Language: Python 3.11
 - Unit: `deploy/systemd/mqtt-bridge.service`
@@ -10,7 +10,7 @@ Subscribes to `livinglab/#`, validates and normalizes payloads, forwards clean r
 
 ## Responsibilities
 
-- Subscribe to `livinglab/+/data` and `livinglab/+/status`
+- Subscribe to `smartgreengarden/+/data` and `smartgreengarden/+/status`
 - Reject malformed payloads (missing fields, out-of-range values, wrong `schema`)
 - Normalize units and types before forwarding
 - Log a warning with the raw payload when validation fails
@@ -38,7 +38,7 @@ python main.py
 ## Debug
 
 ```bash
-mosquitto_sub -t 'livinglab/#' -v          # is anything arriving?
+mosquitto_sub -t 'smartgreengarden/#' -v          # is anything arriving?
 journalctl -u mqtt-bridge -f               # on the Pi
 ```
 

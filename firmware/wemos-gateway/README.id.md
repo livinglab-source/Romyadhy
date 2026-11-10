@@ -10,9 +10,11 @@ TODO: satu kalimat yang menjelaskan fungsi board ini (kontrol relay? node sensor
 
 ## Tanggung jawab
 
-- TODO
-- Subscribe `livinglab/wemos-01/cmd`
-- Publish `livinglab/wemos-01/status` (retained) + Last Will
+- TODO — peran belum dikonfirmasi
+- Subscribe topik perintah relay yang menjadi tanggung jawabnya: `smartgreengarden/relay/<name>/command`
+- Publish state-nya kembali ke topik yang sama agar bot tetap sinkron
+
+> Peran Wemos masih belum diputuskan. Jangan membuat topik baru: pakai kontrak di [../../docs/mqtt-topics.id.md](../../docs/mqtt-topics.id.md).
 
 ## Perangkat keras
 
@@ -40,8 +42,10 @@ cp include/config.h.example include/config.h
 
 | Arah | Topik | Payload |
 |---|---|---|
-| subscribe | `livinglab/wemos-01/cmd` | `{"schema":1,"action":"set_relay","value":1}` |
-| publish (retained) | `livinglab/wemos-01/status` | `{"schema":1,"online":true,"fw":"1.0.0"}` |
+| subscribe | `smartgreengarden/relay/<name>/command` | `1` / `0` |
+| publish | `smartgreengarden/relay/<name>/command` | `1` / `0` (echo state) |
+
+> Nama topik ditentukan oleh kontrak; peran board ini menentukan `<name>` mana yang ditanganinya. Lihat [../../docs/mqtt-topics.id.md](../../docs/mqtt-topics.id.md).
 
 ## Build dan flash
 

@@ -11,9 +11,9 @@ Membaca sensor lingkungan dan publish ke MQTT setiap `PUBLISH_INTERVAL_MS`.
 ## Tanggung jawab
 
 - Membaca TODO: daftar sensor (mis. DHT22, BME280)
-- Publish `livinglab/esp32-01/data` setiap N detik
-- Publish `livinglab/esp32-01/status` (retained) + daftarkan Last Will
-- Subscribe `livinglab/esp32-01/cmd` dan menjalankannya
+- Publish `smartgreengarden/esp32-01/data` setiap N detik
+- Publish `smartgreengarden/esp32-01/status` (retained) + daftarkan Last Will
+- Subscribe `smartgreengarden/esp32-01/cmd` dan menjalankannya
 
 ## Perangkat keras
 
@@ -49,9 +49,9 @@ Kontrak: [../../docs/mqtt-topics.id.md](../../docs/mqtt-topics.id.md)
 
 | Arah | Topik | Payload |
 |---|---|---|
-| publish | `livinglab/esp32-01/data` | `{"schema":1,"device_id":"esp32-01","ts":...,"temp":27.45,"hum":61.2}` |
-| publish (retained) | `livinglab/esp32-01/status` | `{"schema":1,"online":true,"rssi":-67,"uptime_s":...,"fw":"1.0.0"}` |
-| subscribe | `livinglab/esp32-01/cmd` | `{"schema":1,"action":"set_interval","value":10000}` |
+| publish | `smartgreengarden/esp32-01/data` | `{"schema":1,"device_id":"esp32-01","ts":...,"temp":27.45,"hum":61.2}` |
+| publish (retained) | `smartgreengarden/esp32-01/status` | `{"schema":1,"online":true,"rssi":-67,"uptime_s":...,"fw":"1.0.0"}` |
+| subscribe | `smartgreengarden/esp32-01/cmd` | `{"schema":1,"action":"set_interval","value":10000}` |
 
 Last Will pada `status`: `{"schema":1,"device_id":"esp32-01","online":false}`
 

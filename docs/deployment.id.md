@@ -52,7 +52,7 @@ sudo systemctl restart mosquitto
 Uji:
 
 ```bash
-mosquitto_sub -h localhost -u livinglab -P '<password>' -t 'livinglab/#' -v
+mosquitto_sub -h localhost -u livinglab -P '<password>' -t 'smartgreengarden/#' -v
 ```
 
 ## 4. MariaDB
@@ -162,7 +162,7 @@ mysql -u livinglab -p -e "SELECT COUNT(*) FROM livinglab.readings;"
 systemctl is-active mqtt-bridge data-logger telegram-bot
 
 # 4. Ada node yang publish
-mosquitto_sub -t 'livinglab/#' -v
+mosquitto_sub -t 'smartgreengarden/#' -v
 ```
 
 Jika keempatnya lolos, pipeline hidup dari ujung ke ujung.

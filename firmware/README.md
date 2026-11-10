@@ -38,4 +38,4 @@ If you use the Arduino IDE instead, keep the same folder name as the `.ino` sket
 1. Create `firmware/<role>/` with `src/main.cpp`, `platformio.ini`, `README.md`.
 2. Add it to the table above and to `docs/hardware.md`.
 3. Register it in the DB: `INSERT INTO devices (device_id, board_type, role) VALUES (...);`
-4. Publish to `livinglab/<device-id>/data` and set a Last Will on `status`.
+4. Publish to `smartgreengarden/<device-id>/data` and set a Last Will on `status`.

@@ -7,7 +7,7 @@ Work top-down: **device → broker → service → database → bot**. The first
 ## 1. Is the device even publishing?
 
 ```bash
-mosquitto_sub -t 'livinglab/#' -v
+mosquitto_sub -t 'smartgreengarden/#' -v
 ```
 
 | Result | Meaning | Next step |
@@ -124,7 +124,7 @@ uname -a
 systemctl status mosquitto mariadb mqtt-bridge data-logger telegram-bot --no-pager
 journalctl -u mqtt-bridge -u data-logger -u telegram-bot -n 100 --no-pager
 mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"
-mosquitto_sub -t 'livinglab/#' -v -W 5
+mosquitto_sub -t 'smartgreengarden/#' -v -W 5
 ```
 
 TODO: add the error messages you actually hit during development — those are the ones the next student will hit too.

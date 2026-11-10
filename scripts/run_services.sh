@@ -32,8 +32,16 @@ cleanup() {
 trap cleanup EXIT INT TERM
 
 for svc in mqtt-bridge data-logger telegram-bot; do
-  echo "starting $svc"
-  "$PYTHON" "services/$svc/main.py" 2>&1 | sed -u "s/^/[$svc] /" &
+  if [[ -f "services/$svc/main.py" ]]; then
+    entry="main.py"
+  elif [[ -f "services/$svc/telegrambot.py" ]]; then
+    entry="telegrambot.py"
+  else
+    echo "skip $svc (no main.py)" >&2
+    continue
+  fi
+  echo "starting $svc ($entry)"
+  "$PYTHON" "services/$svc/$entry" 2>&1 | sed -u "s/^/[$svc] /" &
   pids+=("$!")
 done
 

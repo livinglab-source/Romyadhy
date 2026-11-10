@@ -4,12 +4,20 @@
 
 Three Python services run on the Raspberry Pi, plus shared helpers.
 
-| Service | Purpose | Runs as |
-|---|---|---|
-| [`mqtt-bridge/`](mqtt-bridge/) | Subscribe to all topics, validate and normalize payloads | `mqtt-bridge.service` |
-| [`data-logger/`](data-logger/) | Write readings to MariaDB | `data-logger.service` |
-| [`telegram-bot/`](telegram-bot/) | Alerts + user commands | `telegram-bot.service` |
-| [`common/`](common/) | Shared config loader, DB connection, MQTT wrapper | *(library, not a service)* |
+| Service | Purpose | Entry point | Runs as |
+|---|---|---|---|
+| [`mqtt-bridge/`](mqtt-bridge/) | Subscribe to all topics, validate and normalize payloads | `main.py` | `mqtt-bridge.service` |
+| [`data-logger/`](data-logger/) | Write readings to MariaDB | `main.py` | `data-logger.service` |
+| [`telegram-bot/`](telegram-bot/) | Alerts, commands, relay control, calibration, CSV export | `telegrambot.py` | `telegram-bot.service` |
+| [`common/`](common/) | Shared config loader, DB connection, MQTT wrapper | — | *(library, not a service)* |
+
+## Status
+
+| Service | Code present |
+|---|---|
+| `telegram-bot` | ✅ implemented (`telegrambot.py`) |
+| `mqtt-bridge` | ⬜ planned — README describes the intended behaviour |
+| `data-logger` | ⬜ planned — README describes the intended behaviour |
 
 ## How they connect
 
@@ -27,11 +35,11 @@ flowchart LR
 
 | Item | Rule |
 |---|---|
-| Entry point | `main.py` in each service folder |
+| Entry point | `main.py` in each service folder (the bot uses `telegrambot.py`) |
 | Dependencies | Per-service `requirements.txt` |
 | Config | Read from environment; local dev loads `.env` |
 | Logging | `logging` module to stdout (journald captures it under systemd) |
-| No secrets | Never hardcode tokens or passwords |
+| No secrets | Never hardcode tokens or passwords — the bot fails fast if one is missing |
 
 ## Run locally
 
