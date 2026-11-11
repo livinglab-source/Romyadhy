@@ -14,6 +14,8 @@
 | 3 | [deployment.id.md](deployment.id.md) | Sedang menyiapkan Raspberry Pi |
 | 4 | [troubleshooting.id.md](troubleshooting.id.md) | Ada yang tidak berjalan |
 
+> **Cakupan.** Repo ini mendokumentasikan pipeline IoT: firmware, dua layanan Python, kontrak MQTT, dan database. Di Raspberry Pi juga tersimpan catatan dan kode proyek lain di `/home/livinglab/workspace/romy`; baca itu untuk hal yang tidak tercakup di sini.
+
 ## Referensi
 
 | Dokumen | Isi |

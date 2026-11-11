@@ -43,7 +43,7 @@ journalctl -u data-logger -n 100 --no-pager
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| `ModuleNotFoundError` | venv not used / deps missing | `sudo -u livinglab .venv/bin/pip install -r services/<svc>/requirements.txt` |
+| `ModuleNotFoundError` | venv not used / deps missing | `.venv/bin/pip install -r services/<svc>/requirements.txt` |
 | `KeyError: 'MQTT_HOST'` | `.env` not loaded or missing key | `EnvironmentFile=` in unit, or copy from `.env.example` |
 | Crash loop, `Restart=always` | Unhandled exception at startup | Read first traceback with `journalctl -u <svc> -n 30` |
 | Service "active" but idle | Wrong topic / never receives messages | Confirm client id and `MQTT_TOPIC_PREFIX` |
@@ -59,8 +59,8 @@ set -a; source ../../.env; set +a
 ## 4. Is data reaching MariaDB?
 
 ```bash
-mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"
-mysql -u livinglab -p livinglab -e "SELECT * FROM readings ORDER BY id DESC LIMIT 5;"
+mysql -u romy -p -e "SELECT COUNT(*) FROM db_romy.hydroponic_water_data_romy;"
+mysql -u romy -p -e "SELECT * FROM db_romy.hydroponic_water_data_romy ORDER BY id DESC LIMIT 5;"
 ```
 
 | Symptom | Cause | Fix |
@@ -69,7 +69,7 @@ mysql -u livinglab -p livinglab -e "SELECT * FROM readings ORDER BY id DESC LIMI
 | `Cannot add or update a child row` (FK) | This schema has no foreign keys — the error means you edited `db/schema.sql` locally | Use the schema in the repo unchanged |
 | `Data too long` / `Incorrect decimal value` | Payload field out of range or wrong type | Check the DECIMAL bounds in `docs/database.md` |
 | Inserts slow after months | Table large, no index on `datetime` | Confirm `idx_sensor_datetime`; apply retention |
-| `Access denied for user` | Wrong DB credentials or host grant | `GRANT ... TO 'livinglab'@'localhost'` |
+| `Access denied for user` | Wrong DB credentials or host grant | `GRANT ... TO 'romy'@'localhost'` |
 
 ## 5. Is the bot responding?
 
@@ -123,7 +123,7 @@ Collect these before asking for help:
 uname -a
 systemctl status mosquitto mariadb data-logger telegram-bot --no-pager
 journalctl -u data-logger -u data-logger -u telegram-bot -n 100 --no-pager
-mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"
+mysql -u romy -p -e "SELECT COUNT(*) FROM db_romy.hydroponic_water_data_romy;"
 mosquitto_sub -t 'smartgreengarden/#' -v -W 5
 ```
 

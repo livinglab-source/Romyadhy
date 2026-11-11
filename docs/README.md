@@ -14,6 +14,8 @@
 | 3 | [deployment.md](deployment.md) | You are setting up the Raspberry Pi |
 | 4 | [troubleshooting.md](troubleshooting.md) | Something does not work |
 
+> **Scope.** This repo documents the IoT pipeline: firmware, the two Python services, the MQTT contract, and the database. The Raspberry Pi also holds other project notes and code under `/home/livinglab/workspace/romy`; read those for anything not covered here.
+
 ## Reference
 
 | Document | Contents |

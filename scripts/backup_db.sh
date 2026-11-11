@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Dump the livinglab database, gzip it, keep the last 7 days.
-# Cron: 15 2 * * * /opt/livinglab/Romyadhy/scripts/backup_db.sh
+# Cron: 15 2 * * * /home/livinglab/workspace/romy/scripts/backup_db.sh
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"

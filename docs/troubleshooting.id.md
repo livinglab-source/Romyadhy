@@ -43,7 +43,7 @@ journalctl -u data-logger -n 100 --no-pager
 
 | Gejala | Penyebab | Solusi |
 |---|---|---|
-| `ModuleNotFoundError` | venv tidak dipakai / dependensi kurang | `sudo -u livinglab .venv/bin/pip install -r services/<svc>/requirements.txt` |
+| `ModuleNotFoundError` | venv tidak dipakai / dependensi kurang | `.venv/bin/pip install -r services/<svc>/requirements.txt` |
 | `KeyError: 'MQTT_HOST'` | `.env` tidak dimuat atau key hilang | `EnvironmentFile=` pada unit, atau salin dari `.env.example` |
 | Crash berulang, `Restart=always` | Exception tak tertangani saat start | Baca traceback pertama: `journalctl -u <svc> -n 30` |
 | Status "active" tapi diam | Topik salah / tidak pernah menerima pesan | Pastikan client id dan `MQTT_TOPIC_PREFIX` |
@@ -59,8 +59,8 @@ set -a; source ../../.env; set +a
 ## 4. Apakah data masuk MariaDB?
 
 ```bash
-mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"
-mysql -u livinglab -p livinglab -e "SELECT * FROM readings ORDER BY id DESC LIMIT 5;"
+mysql -u romy -p -e "SELECT COUNT(*) FROM db_romy.hydroponic_water_data_romy;"
+mysql -u romy -p -e "SELECT * FROM db_romy.hydroponic_water_data_romy ORDER BY id DESC LIMIT 5;"
 ```
 
 | Gejala | Penyebab | Solusi |
@@ -69,7 +69,7 @@ mysql -u livinglab -p livinglab -e "SELECT * FROM readings ORDER BY id DESC LIMI
 | `Cannot add or update a child row` (FK) | Skema ini tidak punya foreign key — error berarti Anda mengubah `db/schema.sql` secara lokal | Pakai skema di repo tanpa perubahan |
 | `Data too long` / `Incorrect decimal value` | Field payload di luar jangkauan atau tipe salah | Cek batas DECIMAL di `docs/database.id.md` |
 | Insert melambat setelah berbulan-bulan | Tabel besar, tidak ada index pada `datetime` | Pastikan `idx_sensor_datetime`; terapkan retensi |
-| `Access denied for user` | Kredensial DB salah atau grant host salah | `GRANT ... TO 'livinglab'@'localhost'` |
+| `Access denied for user` | Kredensial DB salah atau grant host salah | `GRANT ... TO 'romy'@'localhost'` |
 
 ## 5. Apakah bot merespons?
 
@@ -123,7 +123,7 @@ Kumpulkan ini sebelum bertanya:
 uname -a
 systemctl status mosquitto mariadb data-logger telegram-bot --no-pager
 journalctl -u data-logger -u data-logger -u telegram-bot -n 100 --no-pager
-mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"
+mysql -u romy -p -e "SELECT COUNT(*) FROM db_romy.hydroponic_water_data_romy;"
 mosquitto_sub -t 'smartgreengarden/#' -v -W 5
 ```
 

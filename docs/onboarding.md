@@ -43,20 +43,13 @@ Never commit `.env`. Confirm it is ignored:
 git check-ignore -v .env    # should print .gitignore:<line>:.env
 ```
 
-## 4. Get a broker and database
+## 4. Broker and database
 
-**Option A — on the Pi (normal case):** point `.env` at the Pi's LAN IP and skip to §5.
+This project does not use Docker. Two cases:
 
-**Option B — locally with Docker:**
+**A — you work on the Pi (normal case):** Mosquitto and MariaDB are already installed and running. Set `MQTT_HOST=127.0.0.1` and `DB_HOST=127.0.0.1` in `.env`, then go to §5.
 
-```bash
-cd deploy
-docker compose up -d
-```
-
-This starts Mosquitto on `1883` and MariaDB on `3306` with the schema applied.
-
-**Option C — locally without Docker:**
+**B — you develop on your own machine:** install and start them locally.
 
 ```bash
 sudo apt install mosquitto mosquitto-clients mariadb-server
@@ -99,7 +92,7 @@ mosquitto_sub -t 'smartgreengarden/#' -v
 journalctl -u data-logger -f          # or the run_services.sh output
 
 # 3. Watch the DB
-watch -n 5 'mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"'
+watch -n 5 'mysql -u romy -p -e "SELECT COUNT(*) FROM db_romy.hydroponic_water_data_romy;"'
 
 # 4. Talk to the bot
 #    send /status esp32-01 in Telegram
@@ -133,7 +126,7 @@ Open a PR. Do not push directly to `main`.
 
 - [ ] `.env` created and ignored by git
 - [ ] Broker reachable (`mosquitto_sub` shows a message)
-- [ ] Schema applied (`SELECT COUNT(*) FROM readings` works)
+- [ ] Schema applied (`SELECT COUNT(*) FROM hydroponic_water_data_romy` works)
 - [ ] Three services start without traceback
 - [ ] At least one reading reaches MariaDB
 - [ ] Bot replies to `/start`

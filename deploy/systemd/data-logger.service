@@ -7,12 +7,9 @@ Requires=mariadb.service
 [Service]
 Type=simple
 User=livinglab
-WorkingDirectory=/opt/livinglab/Romyadhy/services/data-logger
-EnvironmentFile=/opt/livinglab/Romyadhy/.env
-ExecStart=/opt/livinglab/Romyadhy/.venv/bin/python dataSave.py
-# Local logs live next to the service (LOG_DIR defaults here).
-StateDirectory=livinglab-data-logger
-StateDirectoryMode=0750
+WorkingDirectory=/home/livinglab/workspace/romy/services/data-logger
+EnvironmentFile=/home/livinglab/workspace/romy/.env
+ExecStart=/home/livinglab/workspace/romy/.venv/bin/python dataSave.py
 Restart=always
 RestartSec=5
 StandardOutput=journal

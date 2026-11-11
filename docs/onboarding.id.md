@@ -43,20 +43,13 @@ Jangan pernah commit `.env`. Pastikan sudah diabaikan:
 git check-ignore -v .env    # harus mencetak .gitignore:<baris>:.env
 ```
 
-## 4. Siapkan broker dan database
+## 4. Broker dan database
 
-**Opsi A — di Pi (kasus normal):** arahkan `.env` ke IP LAN Pi lalu lanjut ke §5.
+Proyek ini tidak memakai Docker. Dua kasus:
 
-**Opsi B — lokal dengan Docker:**
+**A — Anda bekerja di Pi (kasus normal):** Mosquitto dan MariaDB sudah terpasang dan berjalan. Set `MQTT_HOST=127.0.0.1` dan `DB_HOST=127.0.0.1` di `.env`, lalu lanjut ke §5.
 
-```bash
-cd deploy
-docker compose up -d
-```
-
-Menjalankan Mosquitto di `1883` dan MariaDB di `3306` dengan skema sudah diterapkan.
-
-**Opsi C — lokal tanpa Docker:**
+**B — Anda mengembangkan di mesin sendiri:** pasang dan jalankan secara lokal.
 
 ```bash
 sudo apt install mosquitto mosquitto-clients mariadb-server
@@ -99,7 +92,7 @@ mosquitto_sub -t 'smartgreengarden/#' -v
 journalctl -u data-logger -f          # atau output run_services.sh
 
 # 3. Pantau DB
-watch -n 5 'mysql -u livinglab -p livinglab -e "SELECT COUNT(*) FROM readings;"'
+watch -n 5 'mysql -u romy -p -e "SELECT COUNT(*) FROM db_romy.hydroponic_water_data_romy;"'
 
 # 4. Bicara ke bot
 #    kirim /status esp32-01 di Telegram
@@ -133,7 +126,7 @@ Buka PR. Jangan push langsung ke `main`.
 
 - [ ] `.env` dibuat dan diabaikan git
 - [ ] Broker terjangkau (`mosquitto_sub` menampilkan pesan)
-- [ ] Skema diterapkan (`SELECT COUNT(*) FROM readings` berhasil)
+- [ ] Skema diterapkan (`SELECT COUNT(*) FROM hydroponic_water_data_romy` berhasil)
 - [ ] Tiga layanan start tanpa traceback
 - [ ] Minimal satu reading masuk MariaDB
 - [ ] Bot menjawab `/start`

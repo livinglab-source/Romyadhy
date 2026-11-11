@@ -46,10 +46,11 @@ Penjelasan lengkap: [docs/architecture.id.md](docs/architecture.id.md)
 ```bash
 git clone <repo-url> && cd Romyadhy
 cp .env.example .env          # lalu isi kredensial MQTT, DB, Telegram, ACCESS_PASSWORD
-sudo apt install mosquitto mosquitto-clients mariadb-server
 mysql -u root -p < db/schema.sql
 scripts/run_services.sh       # menjalankan layanan yang sudah ada
 ```
+
+Di Raspberry Pi, Mosquitto dan MariaDB sudah terpasang — hanya `.env` dan skema yang perlu disiapkan. Tidak ada Docker di mana pun.
 
 Cek data mengalir:
 
