@@ -63,7 +63,6 @@ mysql -u root -p < db/schema.sql
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r services/data-logger/requirements.txt
-pip install -r services/data-logger/requirements.txt
 pip install -r services/telegram-bot/requirements.txt
 
 scripts/run_services.sh
@@ -71,14 +70,13 @@ scripts/run_services.sh
 
 ## 6. Firmware (only if you have a board)
 
-```bash
-cd firmware/esp32-sensor-node
-pio run                 # compile
-pio run -t upload       # flash
-pio device monitor -b 115200
-```
+Firmware sketches (`.ino`) can be flashed via Arduino IDE or PlatformIO:
 
-Set WiFi SSID/password and `device_id` in the firmware config (TODO: where exactly — `config.h` or `platformio.ini` build flags).
+- **ESP32 Sensor Node:** `firmware/esp32-sensor-node/keren-12.ino`
+- **Wemos Water Level A:** `firmware/wemos-gateway/wemos_a_waterlevel_code.ino`
+- **Wemos Water Level B:** `firmware/wemos-gateway/wemos_b_waterlevel_code.ino`
+
+Set WiFi credentials (`ssid`, `password`) and MQTT broker IP (`mqtt_server`) at the top of each sketch before flashing.
 
 ## 7. Verify end to end
 

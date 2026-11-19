@@ -63,7 +63,6 @@ mysql -u root -p < db/schema.sql
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r services/data-logger/requirements.txt
-pip install -r services/data-logger/requirements.txt
 pip install -r services/telegram-bot/requirements.txt
 
 scripts/run_services.sh
@@ -71,14 +70,13 @@ scripts/run_services.sh
 
 ## 6. Firmware (hanya jika punya board)
 
-```bash
-cd firmware/esp32-sensor-node
-pio run                 # kompilasi
-pio run -t upload       # flash
-pio device monitor -b 115200
-```
+Sketch firmware (`.ino`) dapat di-flash lewat Arduino IDE atau PlatformIO:
 
-Set SSID/password WiFi dan `device_id` di konfigurasi firmware (TODO: tepatnya di mana — `config.h` atau build flags `platformio.ini`).
+- **Node Sensor ESP32:** `firmware/esp32-sensor-node/keren-12.ino`
+- **Wemos Level Air A:** `firmware/wemos-gateway/wemos_a_waterlevel_code.ino`
+- **Wemos Level Air B:** `firmware/wemos-gateway/wemos_b_waterlevel_code.ino`
+
+Atur kredensial WiFi (`ssid`, `password`) dan IP broker MQTT (`mqtt_server`) di bagian atas masing-masing sketch sebelum flashing.
 
 ## 7. Verifikasi end to end
 
