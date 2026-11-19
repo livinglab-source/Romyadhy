@@ -182,8 +182,4 @@ gunzip -c /var/backups/livinglab/livinglab-YYYY-MM-DD.sql.gz | mysql -u root -p 
 
 ## Migrasi
 
-Perubahan skema masuk ke `db/migrations/NNN_deskripsi.sql`, berurutan. Jangan mengedit migrasi yang sudah dijalankan; buat yang baru. `db/schema.sql` adalah kondisi penuh terkini untuk instalasi baru.
-
-| File | Diterapkan |
-|---|---|
-| `001_init.sql` | TODO (tanggal) |
+Perubahan skema masuk ke `db/migrations/NNN_deskripsi.sql`, berurutan. Jangan mengedit migrasi yang sudah dijalankan; buat yang baru. `db/schema.sql` adalah skema dasar untuk instalasi baru. Migrasi inkremental di masa mendatang akan dicatat di sini.

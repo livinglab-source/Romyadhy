@@ -182,8 +182,4 @@ gunzip -c /var/backups/livinglab/livinglab-YYYY-MM-DD.sql.gz | mysql -u root -p 
 
 ## Migrations
 
-Schema changes go in `db/migrations/NNN_description.sql`, in order. Never edit an applied migration; add a new one. `db/schema.sql` is the full current state for fresh installs.
-
-| File | Applied |
-|---|---|
-| `001_init.sql` | TODO (date) |
+Schema changes go in `db/migrations/NNN_description.sql`, in order. Never edit an applied migration; add a new one. `db/schema.sql` is the baseline schema for fresh installs. Future incremental migrations will be tracked here.
