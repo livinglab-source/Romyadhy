@@ -24,48 +24,61 @@ The bot and firmware build topics from this prefix, so a different one is a conf
 | `smartgreengarden/sensor/data` | ESP32 → bot | JSON, see below |
 | `smartgreengarden/sensor/request_data` | bot → ESP32 | `1` — asks for an immediate reading |
 | `smartgreengarden/notification` | ESP32 → bot | `{"alert": "...", "level": "warning"}` |
+| `smartgreengarden/waterlevel/wemosA` | Wemos A → bot | JSON, see below (retained) |
+| `smartgreengarden/waterlevel/wemosB` | Wemos B → bot | JSON, see below (retained) |
 
 ### `sensor/data` payload
 
+> **Key casing matters.** The firmware uses mixed casing — consumers must match exactly.
+
 ```json
 {
-  "tds1": 812.4,
-  "tds2": 795.1,
-  "delta_tds": 17.3,
-  "turbidity": 12.5,
-  "flowrate": 6.2,
-  "level1": 88,
-  "level2": 64,
-  "level3": 41,
-  "level4": 27,
-  "water_quality": "2"
+  "tds1": 812.45,
+  "tds2": 795.10,
+  "turbidity": 12.50,
+  "voltage_turbidity": 1.234,
+  "FlowRate": 6.20,
+  "Level1": 88,
+  "adc_level1": 650,
+  "Level2": 64,
+  "adc_level2": 340,
+  "Level3": 41,
+  "adc_level3": 480,
+  "Level4": 27,
+  "adc_level4": 420
 }
 ```
 
 | Key | Unit | Range | Meaning |
 |---|---|---|---|
-| `tds1` | ppm | 0–2000 | TDS probe 1 (nutrient solution) |
-| `tds2` | ppm | 0–2000 | TDS probe 2 |
-| `delta_tds` | % | 0–100 | Difference between the probes |
-| `turbidity` | NTU | 0–100 | ≤50 clear, >50 cloudy |
-| `flowrate` | L/min | 0–30 | Irrigation flow |
-| `level1` | % | 0–100 | Tank 1 — main reservoir |
-| `level2` | % | 0–100 | Tank 2 — mixing basin |
-| `level3` | % | 0–100 | Tank 3 — nutrient buffer |
-| `level4` | % | 0–100 | Tank 4 — drain/overflow |
-| `water_quality` | code | 0–4 | See below |
+| `tds1` | ppm | 0–2000 | TDS probe 1 (ADS1115 AIN2) |
+| `tds2` | ppm | 0–2000 | TDS probe 2 (ADS1115 AIN3) |
+| `turbidity` | NTU | 0–∞ | Computed as `A × voltage + B`; clamped to 0 minimum |
+| `voltage_turbidity` | V | 0–4.096 | Raw ADS1115 AIN0 voltage, 3 decimal places |
+| `FlowRate` | L/min | 0–∞ | Computed as `pulse_count / 7.5` per second |
+| `Level1`–`Level4` | % | 0–100 | Water level, linearised from ADC with per-sensor calibration |
+| `adc_level1`–`adc_level4` | raw | 0–4095 | Raw ESP32 ADC reading before linearisation |
 
-`water_quality` codes:
+The firmware does **not** send `delta_tds` or `water_quality` — those are computed by the bot from the raw values above. Send `"nan"` only if a probe failed; the bot replaces it with `0.0` and excludes it from statistics.
 
-| Code | Meaning |
-|---|---|
-| `0` | 🟡 Cloudy — nutrient suspension |
-| `1` | 🟤 Cloudy — sediment |
-| `2` | 🟢 Normal / clear |
-| `3` | 🟠 Nutrient imbalance |
-| `4` | 🔴 Water level low |
+### `waterlevel/wemosA` payload
 
-The bot recomputes this code from the raw values before display, so a stale code in the payload cannot mislead the dashboard. Send `"nan"` only if a probe failed — the bot replaces it with `0.0` and the value is excluded from statistics.
+```json
+{"level1": 88, "level1_cm": 3.52, "level2": 64, "level2_cm": 2.56}
+```
+
+### `waterlevel/wemosB` payload
+
+```json
+{"level3": 41, "level3_cm": 1.64, "level4": 27, "level4_cm": 1.08}
+```
+
+| Key | Unit | Range | Meaning |
+|---|---|---|---|
+| `level1`–`level4` | % | 0–100 | Water level percentage (linearised from ADS1115 ADC) |
+| `level1_cm`–`level4_cm` | cm | 0–4.0 | Depth in cm (sensor strip = 40 mm) |
+
+Both topics are **retained**. LWT `{"offline":true}` is set on each connection — the broker publishes it if the node dies.
 
 ### `notification` payload
 
@@ -102,22 +115,16 @@ These are **bidirectional on purpose**: the bot publishes a command, and the fir
 
 ## Calibration
 
+The firmware subscribes to these topics for remote TDS calibration. Turbidity calibration is serial-only (`CALTURB`).
+
 | Topic | Direction | Payload |
 |---|---|---|
-| `smartgreengarden/sensor/calibrate/tds1/multi/start` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/tds1/multi/set` | bot → ESP32 | `<ppm>` |
-| `smartgreengarden/sensor/kalibrasi/tds1` | bot → ESP32 | `<ppm>` (single-point) |
-| `smartgreengarden/sensor/calibrate/tds2/multi/start` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/tds2/multi/set` | bot → ESP32 | `<ppm>` |
-| `smartgreengarden/sensor/kalibrasi/tds2` | bot → ESP32 | `<ppm>` |
-| `smartgreengarden/sensor/calibrate/turbidity/start` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/turbidity/next` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/turbidity/cancel` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/turbidity/status` | ESP32 → bot | free text |
+| `smartgreengarden/sensor/kalibrasi/tds1` | bot → ESP32 | `<ppm>` (single-point, e.g. `342`) |
+| `smartgreengarden/sensor/kalibrasi/tds2` | bot → ESP32 | `<ppm>` (single-point) |
 
-Valid ranges: TDS 0–5000 ppm. Turbidity sequence is 0 → 50 → 100 NTU, advanced with `/next`.
+Valid range: TDS 0–5000 ppm. The firmware adjusts the K-value and saves it to EEPROM.
 
-Note the inconsistent spelling — `kalibrasi` for single-point TDS, `calibrate` elsewhere. This is inherited from the firmware and deliberately not changed here to avoid breaking a working setup. If you rename it, change both sides in one commit.
+> `kalibrasi` spelling (Indonesian) is what the firmware uses. Do not rename without updating the firmware at the same time.
 
 ## Legacy topics
 

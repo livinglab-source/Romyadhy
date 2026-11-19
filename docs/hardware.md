@@ -8,55 +8,111 @@
 
 | Role | Board | Folder | Device id (MQTT) |
 |---|---|---|---|
-| Sensor node | ESP32 (TODO: exact model, e.g. DevKit V1) | `firmware/esp32-sensor-node` | `esp32-01` |
+| Sensor node | ESP32 DevKit (WROOM-32) | `firmware/esp32-sensor-node` | `ESP32_SENSOR` |
 | Gateway / relay | Wemos D1 mini (ESP8266) | `firmware/wemos-gateway` | `wemos-01` |
-| Broker + services | Raspberry Pi (TODO: model / RAM / OS) | `services/`, `deploy/` | — |
-
-TODO: confirm the roles. If the ESP32 is the gateway and the Wemos is the sensor node, swap the rows above and rename the folders accordingly.
+| Broker + services | Raspberry Pi | `services/`, `deploy/` | — |
 
 ## Bill of materials
 
 | Qty | Item | Notes |
 |---|---|---|
-| 1 | ESP32 development board | TODO: exact variant |
-| 1 | Wemos D1 mini | ESP8266-based |
-| 1 | Raspberry Pi | Broker, database, Python services |
-| TODO | Temperature/humidity sensor | TODO: DHT22 / BME280 / other |
-| TODO | Power supply | TODO: voltage, current |
-| TODO | Jumper wires, breadboard | |
+| 1 | ESP32 DevKit (WROOM-32) | Main sensor node |
+| 1 | ADS1115 16-bit ADC | I²C, address 0x48, for TDS + turbidity |
+| 2 | Gravity TDS probe | DFRobot or compatible |
+| 1 | Turbidity sensor (analog) | 0–5 V output, read via ADS1115 AIN0 |
+| 1 | Flow sensor YF-S201 (or equiv.) | Pulse output, 7.5 pulses per litre |
+| 4 | Resistive water-level sensor | Analog output |
+| 1 | 16×2 I²C LCD | Address 0x27 |
+| 1 | Wemos D1 mini | Relay gateway (ESP8266) |
+| 1 | Raspberry Pi | MQTT broker, database, Python services |
+| 1 | 5 V power supply | ≥ 2 A recommended (WiFi current spikes) |
 
 ## Wiring — ESP32 sensor node
 
-| Sensor pin | ESP32 pin | GPIO | Notes |
+### ADS1115 (I²C)
+
+| ADS1115 pin | ESP32 pin | Notes |
+|---|---|---|
+| VDD | 3V3 | — |
+| GND | GND | — |
+| SCL | GPIO 22 | Standard ESP32 I²C clock |
+| SDA | GPIO 21 | Standard ESP32 I²C data |
+| ADDR | GND | Sets I²C address to 0x48 |
+| AIN0 | Turbidity sensor output | Via voltage divider if sensor outputs > 3.3 V |
+| AIN2 | TDS probe 1 output | — |
+| AIN3 | TDS probe 2 output | — |
+
+### Level sensors
+
+| Signal | ESP32 GPIO | Notes |
+|---|---|---|
+| Level 1 analog | GPIO 32 | ADC1_CH4 |
+| Level 2 analog | GPIO 33 | ADC1_CH5 |
+| Level 3 analog | GPIO 34 | ADC1_CH6, input-only |
+| Level 4 analog | GPIO 35 | ADC1_CH7, input-only |
+| VCC (all 4) | GPIO 26 | Switched HIGH only during reading to reduce corrosion |
+
+### Flow sensor
+
+| Signal | ESP32 GPIO | Notes |
+|---|---|---|
+| Signal (yellow) | GPIO 27 | `INPUT_PULLUP`, interrupt on RISING |
+| VCC (red) | 5 V | — |
+| GND (black) | GND | — |
+
+### LCD (I²C, shares bus with ADS1115)
+
+| LCD pin | ESP32 pin |
+|---|---|
+| VCC | 5 V |
+| GND | GND |
+| SCL | GPIO 22 |
+| SDA | GPIO 21 |
+
+> Keep this table in sync with the `#define` / `const` pin assignments in `firmware/esp32-sensor-node/keren-12.ino`.
+
+## Wiring — Wemos A & B (Water Level Nodes)
+
+Both nodes are electrically identical. Flash the matching sketch (`wemos_a_*` or `wemos_b_*`) to set the MQTT identity.
+
+### ADS1115 (I²C — shared by both Wemos nodes)
+
+| ADS1115 pin | Wemos pin | GPIO | Notes |
 |---|---|---|---|
-| VCC | 3V3 | — | TODO: check sensor voltage (3.3 V vs 5 V) |
-| GND | GND | — | |
-| DATA | TODO | TODO | TODO: pull-up resistor if required |
+| VDD | 3V3 | — | — |
+| GND | GND | — | — |
+| SCL | D1 | GPIO 5 | — |
+| SDA | D2 | GPIO 4 | — |
+| ADDR | GND | — | Sets I²C address to 0x48 |
+| AIN0 | — | — | Sensor 1 (Wemos A) / Sensor 3 (Wemos B) |
+| AIN1 | — | — | Sensor 2 (Wemos A) / Sensor 4 (Wemos B) |
 
-## Wiring — Wemos gateway
+### Level sensor power gating
 
-| Function | Wemos pin | GPIO | Notes |
+| Signal | Wemos pin | GPIO | Sensor |
 |---|---|---|---|
-| TODO | TODO | TODO | TODO |
+| Sensor VCC (first) | D5 | GPIO 14 | S1 on A / S3 on B |
+| Sensor VCC (second) | D6 | GPIO 12 | S2 on A / S4 on B |
 
-> Keep this table in sync with the pin `#define`s in `firmware/*/src/main.cpp`. A mismatch here is the most common "it worked yesterday" bug.
+> Sensor GND → Wemos GND. Sensor OUT → ADS1115 AINx (see above).
 
 ## Power
 
-| Board | Supply | Typical draw | Notes |
-|---|---|---|---|
-| ESP32 | TODO | TODO | WiFi bursts can spike current |
-| Wemos D1 mini | TODO | TODO | |
-| Raspberry Pi | TODO | TODO | Use a proper PSU; undervoltage causes random reboots |
+| Board | Supply | Notes |
+|---|---|---|
+| ESP32 | 5 V via USB or VIN | WiFi bursts can spike current; use ≥ 2 A supply |
+| Wemos D1 mini | 5 V via USB or 5 V pin | — |
+| Raspberry Pi | 5 V / 3 A (official PSU) | Undervoltage causes random reboots |
 
 ## Network
 
 | Item | Value |
 |---|---|
+| WiFi SSID | `SGG X FSR` (2.4 GHz) |
 | WiFi band | 2.4 GHz only (ESP32/ESP8266 do not support 5 GHz) |
-| Broker host | Raspberry Pi LAN IP — TODO |
-| Broker port | `1883` (no TLS) / `8883` (TLS) |
-| DHCP reservation | Recommended, so the broker IP is stable |
+| Broker host | `192.168.88.88` (Raspberry Pi, static/reserved) |
+| Broker port | `1883` (no TLS) |
+| DHCP reservation | Required — broker IP is hard-coded in firmware |
 
 ## Photos and diagrams
 

@@ -24,48 +24,61 @@ Bot dan firmware membangun topik dari prefix ini, jadi memakai prefix lain adala
 | `smartgreengarden/sensor/data` | ESP32 → bot | JSON, lihat di bawah |
 | `smartgreengarden/sensor/request_data` | bot → ESP32 | `1` — minta reading segera |
 | `smartgreengarden/notification` | ESP32 → bot | `{"alert": "...", "level": "warning"}` |
+| `smartgreengarden/waterlevel/wemosA` | Wemos A → bot | JSON, lihat di bawah (retained) |
+| `smartgreengarden/waterlevel/wemosB` | Wemos B → bot | JSON, lihat di bawah (retained) |
 
 ### Payload `sensor/data`
 
+> **Kapitalisasi key penting.** Firmware menggunakan kapitalisasi campuran — konsumen harus mencocokkan persis.
+
 ```json
 {
-  "tds1": 812.4,
-  "tds2": 795.1,
-  "delta_tds": 17.3,
-  "turbidity": 12.5,
-  "flowrate": 6.2,
-  "level1": 88,
-  "level2": 64,
-  "level3": 41,
-  "level4": 27,
-  "water_quality": "2"
+  "tds1": 812.45,
+  "tds2": 795.10,
+  "turbidity": 12.50,
+  "voltage_turbidity": 1.234,
+  "FlowRate": 6.20,
+  "Level1": 88,
+  "adc_level1": 650,
+  "Level2": 64,
+  "adc_level2": 340,
+  "Level3": 41,
+  "adc_level3": 480,
+  "Level4": 27,
+  "adc_level4": 420
 }
 ```
 
 | Key | Satuan | Rentang | Arti |
 |---|---|---|---|
-| `tds1` | ppm | 0–2000 | Probe TDS 1 (larutan nutrisi) |
-| `tds2` | ppm | 0–2000 | Probe TDS 2 |
-| `delta_tds` | % | 0–100 | Selisih kedua probe |
-| `turbidity` | NTU | 0–100 | ≤50 jernih, >50 keruh |
-| `flowrate` | L/min | 0–30 | Debit irigasi |
-| `level1` | % | 0–100 | Tandon 1 — utama |
-| `level2` | % | 0–100 | Tandon 2 — bak pencampur |
-| `level3` | % | 0–100 | Tandon 3 — buffer nutrisi |
-| `level4` | % | 0–100 | Tandon 4 — pembuangan/overflow |
-| `water_quality` | kode | 0–4 | Lihat di bawah |
+| `tds1` | ppm | 0–2000 | Probe TDS 1 (ADS1115 AIN2) |
+| `tds2` | ppm | 0–2000 | Probe TDS 2 (ADS1115 AIN3) |
+| `turbidity` | NTU | 0–∞ | Dihitung sebagai `A × tegangan + B`; minimum dipatok ke 0 |
+| `voltage_turbidity` | V | 0–4.096 | Tegangan mentah ADS1115 AIN0, 3 desimal |
+| `FlowRate` | L/min | 0–∞ | Dihitung sebagai `jumlah_pulsa / 7.5` per detik |
+| `Level1`–`Level4` | % | 0–100 | Level air, dilinearisasi dari ADC dengan kalibrasi per sensor |
+| `adc_level1`–`adc_level4` | raw | 0–4095 | Nilai ADC mentah ESP32 sebelum linearisasi |
 
-Kode `water_quality`:
+Firmware **tidak** mengirim `delta_tds` maupun `water_quality` — keduanya dihitung oleh bot dari nilai mentah di atas. Kirim `"nan"` hanya jika probe gagal; bot menggantinya dengan `0.0` dan mengecualikannya dari statistik.
 
-| Kode | Arti |
-|---|---|
-| `0` | 🟡 Keruh — suspensi nutrisi |
-| `1` | 🟤 Keruh — sedimen |
-| `2` | 🟢 Normal / jernih |
-| `3` | 🟠 Ketidakseimbangan nutrisi |
-| `4` | 🔴 Level air rendah |
+### Payload `waterlevel/wemosA`
 
-Bot menghitung ulang kode ini dari nilai mentah sebelum ditampilkan, jadi kode usang pada payload tidak bisa menyesatkan dashboard. Kirim `"nan"` hanya jika probe gagal — bot menggantinya dengan `0.0` dan nilai itu dikeluarkan dari statistik.
+```json
+{"level1": 88, "level1_cm": 3.52, "level2": 64, "level2_cm": 2.56}
+```
+
+### Payload `waterlevel/wemosB`
+
+```json
+{"level3": 41, "level3_cm": 1.64, "level4": 27, "level4_cm": 1.08}
+```
+
+| Key | Satuan | Rentang | Arti |
+|---|---|---|---|
+| `level1`–`level4` | % | 0–100 | Persentase level air (dilinearisasi dari ADC ADS1115) |
+| `level1_cm`–`level4_cm` | cm | 0–4.0 | Kedalaman dalam cm (strip sensor = 40 mm) |
+
+Kedua topik bersifat **retained**. LWT `{"offline":true}` didaftarkan setiap koneksi — broker mempublikasikannya jika node mati.
 
 ### Payload `notification`
 
@@ -102,22 +115,16 @@ Ini **sengaja dua arah**: bot mem-publish perintah, lalu firmware mem-publish st
 
 ## Kalibrasi
 
+Firmware berlangganan topik berikut untuk kalibrasi TDS jarak jauh. Kalibrasi turbiditas hanya bisa dilakukan via serial (`CALTURB`).
+
 | Topik | Arah | Payload |
 |---|---|---|
-| `smartgreengarden/sensor/calibrate/tds1/multi/start` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/tds1/multi/set` | bot → ESP32 | `<ppm>` |
-| `smartgreengarden/sensor/kalibrasi/tds1` | bot → ESP32 | `<ppm>` (single-point) |
-| `smartgreengarden/sensor/calibrate/tds2/multi/start` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/tds2/multi/set` | bot → ESP32 | `<ppm>` |
-| `smartgreengarden/sensor/kalibrasi/tds2` | bot → ESP32 | `<ppm>` |
-| `smartgreengarden/sensor/calibrate/turbidity/start` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/turbidity/next` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/turbidity/cancel` | bot → ESP32 | `1` |
-| `smartgreengarden/sensor/calibrate/turbidity/status` | ESP32 → bot | teks bebas |
+| `smartgreengarden/sensor/kalibrasi/tds1` | bot → ESP32 | `<ppm>` (single-point, misal `342`) |
+| `smartgreengarden/sensor/kalibrasi/tds2` | bot → ESP32 | `<ppm>` (single-point) |
 
-Rentang valid: TDS 0–5000 ppm. Urutan turbidity 0 → 50 → 100 NTU, dilanjutkan dengan `/next`.
+Rentang valid: TDS 0–5000 ppm. Firmware menyesuaikan K-value dan menyimpannya ke EEPROM.
 
-Perhatikan ejaan yang tidak konsisten — `kalibrasi` untuk TDS single-point, `calibrate` di tempat lain. Ini warisan dari firmware dan sengaja tidak diubah di sini agar setup yang sudah jalan tidak rusak. Jika ingin dirapikan, ubah kedua sisi dalam satu commit.
+> Ejaan `kalibrasi` (Indonesia) adalah yang dipakai firmware. Jangan ganti nama tanpa memperbarui firmware sekaligus.
 
 ## Topik lama
 
