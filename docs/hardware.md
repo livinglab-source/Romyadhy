@@ -9,7 +9,8 @@
 | Role | Board | Folder | Device id (MQTT) |
 |---|---|---|---|
 | Sensor node | ESP32 DevKit (WROOM-32) | `firmware/esp32-sensor-node` | `ESP32_SENSOR` |
-| Gateway / relay | Wemos D1 mini (ESP8266) | `firmware/wemos-gateway` | `wemos-01` |
+| Water-level node A | Wemos D1 mini (ESP8266) | `firmware/wemos-gateway` (`wemos_a_*`) | `WEMOS_A` |
+| Water-level node B | Wemos D1 mini (ESP8266) | `firmware/wemos-gateway` (`wemos_b_*`) | `WEMOS_B` |
 | Broker + services | Raspberry Pi | `services/`, `deploy/` | — |
 
 ## Bill of materials
