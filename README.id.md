@@ -32,8 +32,8 @@ Penjelasan lengkap: [docs/architecture.id.md](docs/architecture.id.md)
 
 | Komponen | Folder | Bahasa | Status | Dokumentasi |
 |---|---|---|---|---|
-| Node hidroponik ESP32 | `firmware/esp32-sensor-node` | C++ (PlatformIO) | ⬜ source menyusul | [README](firmware/esp32-sensor-node/README.md) |
-| Gateway Wemos | `firmware/wemos-gateway` | C++ (PlatformIO) | ⬜ source menyusul | [README](firmware/wemos-gateway/README.md) |
+| Node hidroponik ESP32 | `firmware/esp32-sensor-node` | C++ (Arduino IDE) | ✅ sudah ada | [README](firmware/esp32-sensor-node/README.md) |
+| Node level air Wemos (A & B) | `firmware/wemos-gateway` | C++ (Arduino IDE) | ✅ sudah ada | [README](firmware/wemos-gateway/README.md) |
 | Data logger | `services/data-logger` | Python 3.11 | ✅ sudah ada | [README](services/data-logger/README.md) |
 | Telegram bot | `services/telegram-bot` | Python 3.11 | ✅ sudah ada | [README](services/telegram-bot/README.md) |
 
@@ -66,8 +66,8 @@ Panduan lengkap Raspberry Pi (systemd, autostart, backup): [docs/deployment.id.m
 
 | Board | Peran | Komponen utama | Dokumentasi |
 |---|---|---|---|
-| ESP32 | Node sensor | TODO: daftar sensor | [docs/hardware.md](docs/hardware.md) |
-| Wemos D1 mini | TODO: peran | TODO: komponen | [docs/hardware.md](docs/hardware.md) |
+| ESP32 (WROOM-32) | Node sensor | ADS1115, 2× probe TDS, turbiditas, flow meter, 4× sensor level, LCD 16×2 | [docs/hardware.md](docs/hardware.md) |
+| Wemos D1 mini × 2 (A & B) | Node level air | ADS1115, 2× sensor level resistif per node | [docs/hardware.md](docs/hardware.md) |
 | Raspberry Pi | Broker + layanan + DB | — | [docs/deployment.id.md](docs/deployment.id.md) |
 
 ---
@@ -92,7 +92,7 @@ Panduan lengkap Raspberry Pi (systemd, autostart, backup): [docs/deployment.id.m
 - [x] Struktur repositori dan dokumentasi
 - [x] Implementasi data logger (`services/data-logger/dataSave.py`)
 - [x] Implementasi Telegram bot (`services/telegram-bot/telegrambot.py`)
-- [ ] Source firmware dimasukkan
+- [x] Source firmware dimasukkan (`firmware/esp32-sensor-node`, `firmware/wemos-gateway`)
 - [ ] Demo end-to-end terverifikasi
 
 ---
