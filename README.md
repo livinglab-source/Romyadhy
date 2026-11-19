@@ -30,8 +30,8 @@ Full explanation: [docs/architecture.md](docs/architecture.md)
 
 | Component | Folder | Language | Status | Doc |
 |---|---|---|---|---|
-| ESP32 hydroponic node | `firmware/esp32-sensor-node` | C++ (PlatformIO) | ⬜ source pending | [README](firmware/esp32-sensor-node/README.md) |
-| Wemos gateway | `firmware/wemos-gateway` | C++ (PlatformIO) | ⬜ source pending | [README](firmware/wemos-gateway/README.md) |
+| ESP32 hydroponic node | `firmware/esp32-sensor-node` | C++ (Arduino IDE) | ✅ implemented | [README](firmware/esp32-sensor-node/README.md) |
+| Wemos water-level nodes (A & B) | `firmware/wemos-gateway` | C++ (Arduino IDE) | ✅ implemented | [README](firmware/wemos-gateway/README.md) |
 | Data logger | `services/data-logger` | Python 3.11 | ✅ implemented | [README](services/data-logger/README.md) |
 | Telegram bot | `services/telegram-bot` | Python 3.11 | ✅ implemented | [README](services/telegram-bot/README.md) |
 
@@ -64,8 +64,8 @@ Full Pi setup (systemd, autostart, backups): [docs/deployment.md](docs/deploymen
 
 | Board | Role | Key components | Doc |
 |---|---|---|---|
-| ESP32 | Sensor node | TODO: sensor list | [docs/hardware.md](docs/hardware.md) |
-| Wemos D1 mini | TODO: role | TODO: components | [docs/hardware.md](docs/hardware.md) |
+| ESP32 (WROOM-32) | Sensor node | ADS1115, 2× TDS probe, turbidity, flow meter, 4× water-level sensor, 16×2 LCD | [docs/hardware.md](docs/hardware.md) |
+| Wemos D1 mini × 2 (A & B) | Water-level nodes | ADS1115, 2× resistive level sensor per node | [docs/hardware.md](docs/hardware.md) |
 | Raspberry Pi | Broker + services + DB | — | [docs/deployment.md](docs/deployment.md) |
 
 ---
@@ -90,7 +90,7 @@ Full Pi setup (systemd, autostart, backups): [docs/deployment.md](docs/deploymen
 - [x] Repository structure and documentation
 - [x] Data logger implementation (`services/data-logger/dataSave.py`)
 - [x] Telegram bot implementation (`services/telegram-bot/telegrambot.py`)
-- [ ] Firmware source added
+- [x] Firmware source added (`firmware/esp32-sensor-node`, `firmware/wemos-gateway`)
 - [ ] End-to-end demo verified
 
 ---
