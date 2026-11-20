@@ -6,10 +6,9 @@ Each folder is one physical board. Folder names describe the **role**; the actua
 
 | Folder | Role | Board | Device id |
 |---|---|---|---|
-| [`esp32-sensor-node/`](esp32-sensor-node/) | Reads sensors, publishes `data` | ESP32 | `esp32-01` |
-| [`wemos-gateway/`](wemos-gateway/) | TODO: gateway / relay role | Wemos D1 mini | `wemos-01` |
-
-> TODO: confirm roles. If they are swapped, swap the folder names and update this table, `docs/hardware.md`, and the root README.
+| [`esp32-sensor-node/`](esp32-sensor-node/) | Reads water-quality sensors, publishes `sensor/data` | ESP32 DevKit | `ESP32_SENSOR` |
+| [`esp32-relay/`](esp32-relay/) | Actuates pumps & valves, obeys relay commands | ESP32 DevKit | `ESP32_Hidroponik_Client` |
+| [`wemos-gateway/`](wemos-gateway/) | Water level sensing (Nodes A & B) | Wemos D1 mini × 2 | `WEMOS_A`, `WEMOS_B` |
 
 ## Common conventions
 

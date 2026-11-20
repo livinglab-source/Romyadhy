@@ -6,10 +6,9 @@ Setiap folder adalah satu board fisik. Nama folder menunjukkan **peran**; model 
 
 | Folder | Peran | Board | Device id |
 |---|---|---|---|
-| [`esp32-sensor-node/`](esp32-sensor-node/) | Membaca sensor, publish `data` | ESP32 | `esp32-01` |
-| [`wemos-gateway/`](wemos-gateway/) | TODO: peran gateway / relay | Wemos D1 mini | `wemos-01` |
-
-> TODO: konfirmasi perannya. Jika tertukar, tukar nama folder dan perbarui tabel ini, `docs/hardware.id.md`, serta README root.
+| [`esp32-sensor-node/`](esp32-sensor-node/) | Membaca sensor kualitas air, publish `sensor/data` | ESP32 DevKit | `ESP32_SENSOR` |
+| [`esp32-relay/`](esp32-relay/) | Mengontrol pompa & valve, mematuhi perintah relay | ESP32 DevKit | `ESP32_Hidroponik_Client` |
+| [`wemos-gateway/`](wemos-gateway/) | Pembacaan level air (Node A & B) | Wemos D1 mini × 2 | `WEMOS_A`, `WEMOS_B` |
 
 ## Konvensi umum
 
