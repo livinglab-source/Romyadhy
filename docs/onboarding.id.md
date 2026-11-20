@@ -73,6 +73,7 @@ scripts/run_services.sh
 Sketch firmware (`.ino`) dapat di-flash lewat Arduino IDE atau PlatformIO:
 
 - **Node Sensor ESP32:** `firmware/esp32-sensor-node/keren-12.ino`
+- **Kontroler Relay ESP32:** `firmware/esp32-relay/ESP32-RELAY.ino`
 - **Wemos Level Air A:** `firmware/wemos-gateway/wemos_a_waterlevel_code.ino`
 - **Wemos Level Air B:** `firmware/wemos-gateway/wemos_b_waterlevel_code.ino`
 

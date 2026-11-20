@@ -73,6 +73,7 @@ scripts/run_services.sh
 Firmware sketches (`.ino`) can be flashed via Arduino IDE or PlatformIO:
 
 - **ESP32 Sensor Node:** `firmware/esp32-sensor-node/keren-12.ino`
+- **ESP32 Relay Controller:** `firmware/esp32-relay/ESP32-RELAY.ino`
 - **Wemos Water Level A:** `firmware/wemos-gateway/wemos_a_waterlevel_code.ino`
 - **Wemos Water Level B:** `firmware/wemos-gateway/wemos_b_waterlevel_code.ino`
 
