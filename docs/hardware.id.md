@@ -9,6 +9,7 @@
 | Peran | Board | Folder | Device id (MQTT) |
 |---|---|---|---|
 | Node sensor | ESP32 DevKit (WROOM-32) | `firmware/esp32-sensor-node` | `ESP32_SENSOR` |
+| Kontroler relay | ESP32 DevKit (WROOM-32) | `firmware/esp32-relay` | `ESP32_Hidroponik_Client` |
 | Node level air A | Wemos D1 mini (ESP8266) | `firmware/wemos-gateway` (`wemos_a_*`) | `WEMOS_A` |
 | Node level air B | Wemos D1 mini (ESP8266) | `firmware/wemos-gateway` (`wemos_b_*`) | `WEMOS_B` |
 | Broker + layanan | Raspberry Pi | `services/`, `deploy/` | — |
@@ -17,16 +18,18 @@
 
 | Jumlah | Item | Catatan |
 |---|---|---|
-| 1 | ESP32 DevKit (WROOM-32) | Node sensor utama |
-| 1 | ADS1115 ADC 16-bit | I²C, alamat 0x48, untuk TDS + kekeruhan |
+| 2 | ESP32 DevKit (WROOM-32) | 1× Node sensor, 1× Kontroler relay |
+| 2 | Wemos D1 mini (ESP8266) | Node level air (A & B) |
+| 1 | Modul relay 5-channel | 2× relay AC (pompa, pengaduk), 3× relay DC (pompa kuras, 2× valve) |
+| 1 | ADS1115 ADC 16-bit | I²C, alamat 0x48, untuk TDS + kekeruhan pada node sensor |
+| 2 | ADS1115 ADC 16-bit | 1× per node level air Wemos |
 | 2 | Probe TDS Gravity | DFRobot atau kompatibel |
 | 1 | Sensor kekeruhan (analog) | Output 0–5 V, dibaca via ADS1115 AIN0 |
 | 1 | Sensor aliran YF-S201 (atau setara) | Output pulsa, 7,5 pulsa per liter |
-| 4 | Sensor level air resistif | Output analog |
+| 8 | Sensor level air resistif | 4 pada node sensor ESP32, 2 pada Wemos A, 2 pada Wemos B |
 | 1 | LCD 16×2 I²C | Alamat 0x27 |
-| 1 | Wemos D1 mini | Gateway relay (ESP8266) |
 | 1 | Raspberry Pi | Broker MQTT, database, layanan Python |
-| 1 | Power supply 5 V | ≥ 2 A disarankan (lonjakan arus WiFi) |
+| 2 | Power supply 5 V | ≥ 2 A disarankan per board MCU |
 
 ## Wiring — node sensor ESP32
 
@@ -71,6 +74,20 @@
 | SDA | GPIO 21 |
 
 > Jaga tabel ini tetap sinkron dengan assignment pin `#define` / `const` di `firmware/esp32-sensor-node/keren-12.ino`.
+
+## Wiring — Kontroler relay ESP32
+
+Semua output menggunakan **logika active-LOW** (`LOW` = ON, `HIGH` = OFF). State default saat boot adalah `HIGH` (semua MATI).
+
+| Aktuator | Tipe Relay | GPIO ESP32 | Logika | Fungsi |
+|---|---|---|---|---|
+| Pompa Irigasi | AC 220V | GPIO 26 | Active LOW | Pompa sirkulasi irigasi utama |
+| Pengaduk Tandon | AC 220V | GPIO 25 | Active LOW | Dinamo pengaduk larutan nutrisi |
+| Pompa Kuras | DC 12V | GPIO 27 | Active LOW | Pompa DC pengurasan |
+| Valve Kuras | DC 12V | GPIO 13 | Active LOW | Solenoid valve pembuangan keluar |
+| Valve Tandon | DC 12V | GPIO 32 | Active LOW | Solenoid valve pemilih tandon |
+
+> Jaga tabel ini tetap sinkron dengan `firmware/esp32-relay/ESP32-RELAY.ino`.
 
 ## Wiring — Wemos A & B (Node Level Air)
 
