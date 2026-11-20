@@ -1,0 +1,24 @@
+// Copy to include/config.h and fill in real values.
+// include/config.h is git-ignored.
+
+#pragma once
+
+// --- WiFi (2.4 GHz only) ---
+#define WIFI_SSID     "LivingLab"
+#define WIFI_PASSWORD "your-wifi-password"
+
+// --- MQTT Broker (Raspberry Pi LAN IP) ---
+#define MQTT_HOST "192.168.88.88"
+#define MQTT_PORT 1883
+#define MQTT_CLIENT_ID "ESP32_Hidroponik_Client"
+
+// --- MQTT Topic Root ---
+// Note: set to "smartgreengarden" or "smartgarden" matching your setup
+#define MQTT_TOPIC_PREFIX "smartgarden"
+
+// --- Relay Output Pins (Active LOW) ---
+#define PIN_RELAY_POMPA         26  // Irrigation Pump (AC)
+#define PIN_RELAY_PENGADUK      25  // Stirrer / Mixer Dinamo (AC)
+#define PIN_RELAY_KURAS_TANDON  27  // Drainage Pump (DC)
+#define PIN_RELAY_KURAS         13  // Valve Drain Out (DC)
+#define PIN_RELAY_VALVE_TANDON  32  // Valve Tandon (DC)
