@@ -12,8 +12,10 @@ Living Lab adalah pipeline IoT dengan tiga lapisan:
 
 ```mermaid
 flowchart TB
-  subgraph Edge["Edge (sensor)"]
-    ESP["ESP32<br/>sensor + relay"]
+  subgraph Edge["Edge (node fisik)"]
+    ESP_S["ESP32<br/>node sensor"]
+    ESP_R["ESP32<br/>kontroler relay"]
+    WEMOS["Wemos A & B<br/>node level air"]
   end
 
   subgraph Pi["Raspberry Pi"]
@@ -26,8 +28,8 @@ flowchart TB
 
   TG["Telegram API"]
 
-  ESP -->|"sensor/data"| MQ
-  ESP -->|"notification"| MQ
+  ESP_S -->|"sensor/data"| MQ
+  WEMOS -->|"waterlevel/wemos*"| MQ
   MQ --> LOG
   LOG -->|"INSERT"| DB
   LOG -.->|"mirror"| FB
@@ -36,14 +38,16 @@ flowchart TB
   BOT -->|"sendMessage"| TG
   TG -->|"/perintah"| BOT
   BOT -->|"relay/*/command<br/>system/mode"| MQ
-  MQ -->|"perintah relay"| ESP
+  MQ -->|"perintah relay"| ESP_R
 ```
 
 ## Tanggung jawab
 
 | Komponen | Menangani | **Tidak** menangani |
 |---|---|---|
-| Firmware ESP32 | Membaca sensor, mengendalikan relay, publish `sensor/data` dan `notification`, menjalankan topik relay/mode/kalibrasi | Akses DB langsung, panggilan Telegram |
+| Node Sensor ESP32 | Membaca TDS, turbiditas, flow, level 1–4, publish `sensor/data`, kalibrasi | Kontrol relay, akses DB |
+| Kontroler Relay ESP32 | Subscribe perintah relay, sekuens kuras (`kuras_tandon`, `kuras`), memicu 5 relay (active-LOW) | Membaca sensor, akses DB |
+| Node Wemos (A & B) | Membaca level air presisi via ADS1115, publish `waterlevel/wemos*` | Kontrol relay, akses DB |
 | `data-logger` | Subscribe `sensor/data`, meratakan JSON, menulis MariaDB, mirror Firebase opsional, peringatan watchdog | Validasi input perintah, berinteraksi dengan pengguna |
 | `telegram-bot` | Antarmuka perintah, alert, kontrol relay, urutan kalibrasi, export CSV, log event relay | Menulis reading sensor ke DB |
 | Mosquitto | Routing pesan, retained state untuk topik relay/mode | Logika bisnis |

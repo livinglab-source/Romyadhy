@@ -12,8 +12,10 @@ The Living Lab is an IoT pipeline with three layers:
 
 ```mermaid
 flowchart TB
-  subgraph Edge["Edge (sensors)"]
-    ESP["ESP32<br/>sensors + relays"]
+  subgraph Edge["Edge (nodes)"]
+    ESP_S["ESP32<br/>sensor node"]
+    ESP_R["ESP32<br/>relay controller"]
+    WEMOS["Wemos A & B<br/>water level nodes"]
   end
 
   subgraph Pi["Raspberry Pi"]
@@ -26,8 +28,8 @@ flowchart TB
 
   TG["Telegram API"]
 
-  ESP -->|"sensor/data"| MQ
-  ESP -->|"notification"| MQ
+  ESP_S -->|"sensor/data"| MQ
+  WEMOS -->|"waterlevel/wemos*"| MQ
   MQ --> LOG
   LOG -->|"INSERT"| DB
   LOG -.->|"mirror"| FB
@@ -36,14 +38,16 @@ flowchart TB
   BOT -->|"sendMessage"| TG
   TG -->|"/commands"| BOT
   BOT -->|"relay/*/command<br/>system/mode"| MQ
-  MQ -->|"relay commands"| ESP
+  MQ -->|"relay commands"| ESP_R
 ```
 
 ## Responsibilities
 
 | Component | Owns | Does **not** do |
 |---|---|---|
-| ESP32 firmware | Reading sensors, driving relays, publishing `sensor/data` and `notification`, obeying relay/mode/calibration topics | Direct DB access, Telegram calls |
+| ESP32 Sensor Node | Reading TDS, turbidity, flow, level 1–4, publishing `sensor/data`, calibration topics | Relay actuation, DB access |
+| ESP32 Relay Controller | Subscribing to relay commands, timed drain sequences (`kuras_tandon`, `kuras`), driving 5 relays (active-LOW) | Sensor reading, DB access |
+| Wemos Nodes (A & B) | High-precision water level reading via ADS1115, publishing `waterlevel/wemos*` | Relay control, DB access |
 | `data-logger` | Subscribe to `sensor/data`, flatten JSON, write MariaDB, optional Firebase mirror, watchdog warnings | Validate command input, talk to users |
 | `telegram-bot` | Command interface, alerts, relay control, calibration sequencing, CSV export, relay event log | Write sensor readings to the DB |
 | Mosquitto | Message routing, retained state for relay/mode topics | Business logic |
